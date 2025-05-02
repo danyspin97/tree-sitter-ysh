@@ -1,0 +1,40 @@
+{
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/config.schema.json",
+  "grammars": [
+    {
+      "name": "ysh",
+      "camelcase": "Ysh",
+      "title": "YSH",
+      "scope": "source.ysh",
+      "file-types": [
+        "ysh"
+      ],
+      "injection-regex": "^ysh$",
+      "class-name": "TreeSitterYsh"
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": "Tree-sitter parser for YSH shell script language",
+    "authors": [
+      {
+        "name": "Danilo Spinella",
+        "email": "oss@danyspin97.org",
+        "url": "https://danyspin97.org/"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/danyspin97/tree-sitter-ysh"
+    }
+  },
+  "bindings": {
+    "c": true,
+    "go": true,
+    "node": true,
+    "python": true,
+    "rust": true,
+    "swift": true,
+    "zig": false
+  }
+}
