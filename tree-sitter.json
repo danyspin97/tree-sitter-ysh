@@ -9,12 +9,13 @@
       "file-types": [
         "ysh"
       ],
+      "first-line-regex": "#!.*\\bysh$",
       "injection-regex": "^ysh$",
       "class-name": "TreeSitterYsh"
     }
   ],
   "metadata": {
-    "version": "0.1.0",
+    "version": "0.0.1",
     "license": "MIT",
     "description": "Tree-sitter parser for YSH shell script language",
     "authors": [

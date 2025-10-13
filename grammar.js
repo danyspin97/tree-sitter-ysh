@@ -7,308 +7,556 @@
 /// <reference types="tree-sitter-cli/dsl" />
 // @ts-check
 
+const SPECIAL_CHARACTERS = [
+  "'",
+  '"',
+  "<",
+  ">",
+  "{",
+  "}",
+  "\\[",
+  "\\]",
+  "(",
+  ")",
+  "`",
+  "$",
+  "|",
+  "&",
+  ";",
+  "\\",
+  "\\s",
+];
+
 const PREC = {
-  COMMENT: 0,
-}
+  UPDATE: 0,
+  ASSIGN: 1,
+  TERNARY: 2,
+  LOGICAL_OR: 3,
+  LOGICAL_AND: 4,
+  BITWISE_OR: 5,
+  BITWISE_XOR: 6,
+  BITWISE_AND: 7,
+  EQUALITY: 8,
+  COMPARE: 9,
+  TEST: 10,
+  UNARY: 11,
+  SHIFT: 12,
+  ADD: 13,
+  MULTIPLY: 14,
+  EXPONENT: 15,
+  NEGATE: 16,
+  PREFIX: 17,
+  CHAIN: 18,
+  POSTFIX: 19,
+};
 
 module.exports = grammar({
   name: "ysh",
-
-  extras: $ => [
-    / /,
-    $.comment
+  inline: ($) => [
+    $._statement,
+    $._terminator,
   ],
-
+  extras: ($) => [
+    / /,
+    /\\\r?\n/,
+    /\\( |\t|\v|\f)/,
+    $.comment,
+  ],
+  supertypes: ($) => [
+    $._statement,
+  ],
+  reserved: {
+    global: ($) => [
+      "var",
+      "setvar",
+      "setglobal",
+      "const",
+      "for",
+      "in",
+      "while",
+      "if",
+      "elif",
+      "else",
+      "case"
+    ],
+  },
   rules: {
-    source_file: $ => repeat($._definition),
-
-    _definition: $ => choice(
+    program: ($) => optional($._statements),
+    _statements: ($) =>
+      seq(repeat(choice(seq($._statement, choice($._terminator, /\n/)), /\n/)), $._statement),
+    _statement: ($) => choice(
+      $.variable_declaration,
+      $.variable_assignment,
+      $.constant_declaration,
+      // $.multiline_command_call,
+      $.expression_mode,
+      $.command_call,
       $.function_definition,
-      $._statement
-    ),
-
-    function_definition: $ => seq(
-      'func',
-      $.function_identifier,
-      $.parameter_list,
-      $.block
-    ),
-
-    function_identifier: $ => $.identifier,
-
-    function_parameter: $ => $.identifier,
-
-    parameter_list: $ => seq(
-      $.left_paren,
-        optional(
-          seq(
-            $.function_parameter,
-            optional(
-              repeat1(
-                seq(
-                  $.comma,
-                  $.function_parameter
-                )
-              )
-            )
-          )
-        ),
-        optional(
-          seq(
-            ';',
-            $.named_parameter,
-            optional(
-              repeat1(
-                seq(
-                  $.comma,
-                  $.named_parameter
-                )
-              )
-            )
-          )
-        ),
-      $.right_paren
-    ),
-
-    block: $ => seq(
-      $.left_bracket,
-      repeat($._statement),
-      $.right_bracket
-    ),
-
-    left_bracket: $ => '{',
-    right_bracket: $ => '}',
-
-    _statement: $ => choice(
-      $._declaration,
-      $.function_call_shell,
+      $.proc_definition,
       $.for_statement,
+      $.while_statement,
+      $.if_statement,
+      $.case_statement,
+      $.piped_statement,
     ),
-
-    _declaration: $ => seq(
+    _expression: ($) =>
       choice(
-        seq(
-          choice(
-            'var',
-            'setvar',
-          ),
-          $.variable,
-        ),
-        seq(
-          'const',
-          $.constant
-        ),
+        $.function_call,
+        $._primary,
+        $._postfix,
+        $.unary_expression,
+        $.binary_expression,
+        $.null,
+        $._paren_expression,
       ),
-      $.equal_sign,
-      $.expression,
-      '\n'
+    piped_statement: $ => prec.left(seq( $._statement, '|', $._statement)),
+    function_definition: ($) => seq("func", $.function_name, $.parameter_list, $.func_block),
+    proc_definition: ($) => seq("proc", $.function_name, $.proc_parameter_list, $.proc_block),
+    rest_of_arguments: ($) => seq(",", "...", $.variable_name),
+    parameter_list: ($) => seq(
+      "(",
+      commaSep($.function_parameter),
+      optional($.rest_of_arguments),
+      optional(seq(
+        ";",
+        commaSep($.named_parameter),
+        optional($.rest_of_arguments),
+      )),
+      ")",
     ),
-
-    function_call_shell: $ => seq(
-      $.function_name,
-      repeat(
-        $.function_call_parameter,
-      ),
-      '\n'
+    proc_parameter_list: ($) => seq(
+      "(",
+      commaSep($.function_parameter),
+      optional($.rest_of_arguments),
+      optional(seq(';',
+        commaSep($.function_parameter),
+        optional($.rest_of_arguments),
+        optional(seq(
+          ";",
+          commaSep($.named_parameter),
+          optional($.rest_of_arguments),
+          optional(seq(';',
+            optional($.function_parameter)))
+        ))
+      )),
+      ")",
     ),
-
-    function_name: $ => $.identifier,
-
-    function_call_parameter: $ => choice(
-      $.dollar_variable,
-      $.paren_expression,
-      $.value,
-      $.non_quoted_string,
-    ),
-
-    dollar_variable: $ => seq(
-      $.dollar_token,
-      choice(
-        $.variable,
-        seq(
-          '{',
-          $.variable,
-          '}'
-        ),
-      )
-    ),
-
-    dollar_token: $ => '$',
-
-    for_statement: $ => seq(
-      'for',
-      $.identifier,
-      optional(
-        repeat1(
-          seq(
-            $.comma,
-            $.identifier
-          )
-        )
-      ),
-      'in',
-      $.for_clause,
-      $.block
-    ),
-
-    for_clause: $ => choice(
-      $.for_range,
-      $.paren_expression,
-      $.glob
-    ),
-
-    for_range: $ => seq(
-      $.left_paren,
-      choice(
-        $.number,
-        $.variable,
-      ),
-      $.range_operator,
-      choice(
-        $.number,
-        $.variable,
-      ),
-      $.right_paren
-    ),
-
-    range_operator: $ => '..<',
-
-    paren_expression: $ => seq(
-      $.left_paren,
-      $.expression,
-      $.right_paren
-    ),
-
-    left_paren: $ => '(',
-    right_paren: $ =>')',
-
-    return_statement: $ => seq(
-      'return',
-      $.paren_expression
-    ),
-
-    expression: $ => choice(
-      $.function_call,
-      $.value,
-    ),
-
-    function_call: $ => seq(
+    parameter_list_call: ($) =>
       seq(
-        $.identifier,
-        $.left_paren,
-        optional(
-          choice(
-            seq(
-              choice(
-                $.function_parameter,
-                $.value,
-              ),
-              repeat(seq(
-                $.comma,
-                choice(
-                  $.function_parameter,
-                  $.value,
-                )
-              ))
-            ),
-            $.subshell
+        "(",
+        commaSep($._expression),
+        optional($.rest_of_arguments),
+        optional(seq(
+          ";",
+          commaSep($.named_parameter),
+          optional($.rest_of_arguments),
+        )),
+        ")",
+      ),
+    block: $ => seq(
+      '{',
+        repeat(choice('\n', '\\{', '\\}')),
+        $._statement,
+        repeat(choice('\\{', '\\}', '\n',
+          seq(choice($._terminator, '\n'), $._statement))),
+      '}'
+    ),
+    func_block: $ => seq(
+      '{',
+        repeat(choice('\n', '\\{', '\\}')),
+        choice($._statement, $.func_return),
+        repeat(choice('\\{', '\\}', '\n',
+          seq(choice($._terminator, '\n'), choice($._statement, $.func_return)))),
+      '}'
+    ),
+    func_return: $ => seq('return', $._paren_expression),
+    proc_block: $ => seq(
+      '{',
+        repeat(choice('\n', '\\{', '\\}')),
+        choice($._statement, $.proc_return),
+        repeat(choice('\\{', '\\}', '\n',
+          seq(choice($._terminator, '\n'), choice($._statement, $.proc_return)))),
+      '}'
+    ),
+    proc_return: $ => seq('return', $._literal),
+    variable_declaration: ($) =>
+      seq(
+        "var",
+        field("variable", $.variable_name),
+        "=",
+        field("value", $._expression),
+      ),
+    variable_assignment: ($) =>
+      seq(
+        choice("setvar", "setglobal"),
+        field("variable", $.variable_name),
+        optional($._variable_access),
+        choice("=", "+="),
+        field("value", $._expression),
+      ),
+    constant_declaration: ($) =>
+      seq(
+        "const",
+        field("constant", $.variable_name),
+        "=",
+        $._expression,
+      ),
+    command_call: $ => prec.left(seq(
+      optional('!'),
+      $.command_name,
+      repeat(choice($._literal, $.word)),
+      optional($.parameter_list_call),
+      optional($.block),
+    )),
+    multiline_command_call: $ => seq(
+      '...',
+      $.command_name,
+      repeat(seq(choice($.command_line, $.comment), '\n')),
+      optional($.command_line)
+    ),
+    command_line: $ => seq(repeat1(choice($._literal, $.word))),
+    dollar_token: ($) => "$",
+    for_statement: ($) =>
+      seq(
+        "for",
+        $.variable_name,
+        repeat(
+          seq(
+            ",",
+            $.variable_name,
           ),
         ),
-        $.right_paren
+        "in",
+        $._for_clause,
+        $.block,
+      ),
+    _for_clause: ($) =>
+      choice(
+        $._for_range,
+        $._paren_expression,
+        prec.left(field("value", repeat1(choice(
+          $._literal, $.word
+        )))),
+      ),
+    _for_range: ($) => seq("(", $._expression, $.range_operator, $._expression, ")"),
+    _control_flow_condition: $ => choice($._paren_expression, $.command_call),
+    while_statement: $ => prec.right(seq('while', $._control_flow_condition, $.block)),
+    if_statement: $ => seq(
+      'if',
+      $._control_flow_condition,
+      $.block,
+      repeat(seq('elif', $._control_flow_condition, $.block)),
+      optional(seq('else', $.block))
+    ),
+    case_statement: $ => prec.right(seq(
+      "case",
+      $._paren_expression,
+      "{",
+        repeat(choice('\n', $.case_condition)),
+      "}",
+    )),
+    case_condition: $ => seq(
+      choice($.glob, $._paren_expression, $.eggex, seq('(', 'else', ')')), repeat('\n'), $.block
+    ),
+    _paren_expression: ($) =>
+      seq(
+        "(",
+        $._expression,
+        ")",
+      ),
+    return_statement: ($) =>
+      seq(
+        "return",
+        $._paren_expression,
+      ),
+    _variable_access: ($) => seq(
+      choice(
+        seq(
+          ".",
+          field("key", $.variable_name),
+        ),
+        prec.left(seq(
+          "[",
+          field("key", $._expression),
+          "]",
+        )),
       ),
     ),
-
-    subshell: $ => seq(
-      $.dollar_token,
-      $.left_paren,
-      $.function_call_shell,
-      $.right_paren
-    ),
-
-    empty_array: $ => '[]',
-    empty_dict: $ => '{}',
-
-    glob: $ => seq(
-      repeat1(/\w+/)
-    ),
-
-    named_parameter: $ => seq(
+    expression_mode: $ => prec.left(seq(
+      choice('call', '='),
+      $._expression,
+    )),
+    function_call: $ => prec.left(seq(
+      seq(
+        field('call', $.function_name),
+        '(',
+          commaSep($._expression),
+          optional(seq(choice(',', ';'), commaSep($.named_parameter))),
+        ')'
+      ),
+    )),
+    dict: ($) => seq("{", commaSep(seq(
+      choice($.variable_name, seq('[', $._expression, ']')), ":", $._expression)), "}"),
+    list: ($) => seq("[", commaSep($._expression), "]"),
+    literal_list: $ => seq(':|', repeat($.word), '|'),
+    glob: ($) => seq(repeat1(/\w+/)),
+    named_parameter: ($) => seq(
       $.function_parameter,
-      optional(
-        seq(
-          $.equal_sign,
-          $.value
-        )
-      )
+      repeat('\n'),
+      "=",
+      repeat('\n'),
+      $._expression,
     ),
-
-    equal_sign: $ => '=',
-
-    identifier: $ => new RustRegex('(?i)[a-z_][a-z0-9_]*'),
-
-    constant: $ => $.identifier,
-    variable: $ => choice(
-      $.identifier,
-      $.positional_argument
-    ),
-
-    positional_argument: $ => /[1-9][0-9]?/,
-
-    number: $ => /\d+/,
-
-    value: $ => choice(
+    _postfix: $ => prec.left(PREC.POSTFIX, seq(
+      $._expression,
+      repeat1(choice(
+        $._variable_access,
+        $.method_call,
+      ))
+    )),
+    _primary: $ => prec.right(20, choice(
       $.number,
-      $.string,
       $.boolean,
-      $.null,
-      $.empty_array,
-      $.empty_dict,
-    ),
-
+      $.string,
+      $.list,
+      $.dict,
+      $.eggex,
+      $.escaped_newline_value,
+      $.literal_list,
+      $.variable_name,
+      $.escaped_double_quote,
+      $.escaped_single_quote,
+    )),
+    _literal: ($) => choice($.number, $.boolean, $.string, $.expansion),
     string: $ => choice(
+        $._double_quotes_string,
+        $._single_quotes_string,
+        $._raw_string,
+        $._j8_string,
+        $._byte_string,
+    ),
+    method_call: $ => seq(
+      choice('.', '->'),
+      field('method', $.function_name),
+      '(', commaSep($._expression), ')'),
+    expansion: $ => choice(
+      seq(
+        '$',
+        field("variable", /[0-9\?\#\*]/),
+      ),
+      seq(
+        '$',
+        field("variable", $.variable_name),
+      ),
+      seq(
+        '${',
+        field("variable", $.variable_name),
+        optional(seq(':-', $._literal)),
+        '}'
+      ),
+      seq(
+        '@',
+        $.variable_name
+      ),
+      seq(
+        choice('$', '@', '^'),
+        '[',
+        $._expression,
+        ']'
+      ),
+      seq(
+        choice('$', '@', '^'),
+        '(',
+          $.command_call,
+        ')'
+      ),
+    ),
+    binary_expression: ($) => {
+      const table = [
+        ["or", PREC.LOGICAL_OR],
+        ["and", PREC.LOGICAL_AND],
+        ["|", PREC.BITWISE_OR],
+        ["^", PREC.BITWISE_XOR],
+        ["&", PREC.BITWISE_AND],
+        [choice("==", "!=", "===", "~=="), PREC.EQUALITY],
+        [choice("<", ">", "<=", ">=", "~", "!~", "~~", "!~~"), PREC.COMPARE],
+        [choice("<<", ">>"), PREC.SHIFT],
+        [choice("+", "-", "++"), PREC.ADD],
+        [choice("*", "/", "%"), PREC.MULTIPLY],
+        ["**", PREC.EXPONENT],
+        ["=>", PREC.CHAIN],
+      ];
+
+      return choice(...table.map(([operator, precedence]) => {
+        // @ts-ignore
+        return prec.left(
+          precedence,
+          seq(
+            field("left", $._expression),
+            // @ts-ignore
+            field("operator", operator),
+            field("right", $._expression),
+          ),
+        );
+      }));
+    },
+    unary_expression: $ => seq(
+      'not',
+      $._expression
+    ),
+    _double_quotes_string: ($) => seq(optional('$'), choice(
       seq(
         '"',
-        repeat(choice(
-          token.immediate(prec(1, /[^"\n\\]+/)),
-          $.escape_sequence
-        )),
-        '"'
+        repeat($._double_quotes_string_content),
+        '"',
       ),
       seq(
-        "'",
-        repeat(choice(
-          token.immediate(prec(1, /[^'\n\\]+/)),
-          $.escape_sequence
-        )),
-        "'"
+        '"""',
+        repeat($._double_quotes_string_content),
+        '"""'
       )
-    ),
-
-    non_quoted_string: $ => choice(
-      $.chars,
-      $.path,
-    ),
-
-    chars: $ => new RustRegex('[^ ]+\n'),
-
-    path: $ => new RustRegex('(/[^/ ]*)+'),
-
-    escape_sequence: $ => token.immediate(seq(
-      '\\',
-      /[^xuU]/,
     )),
-
-    null: $ => 'null',
-
-    boolean: $ => choice(
-      'true',
-      'false'
+    _double_quotes_string_content: $ => choice(
+      /[^\$\\"]+/,
+      $.escape_special_characters,
+      $.escaped_double_quote,
+      $.escaped_newline,
+      $.expansion
     ),
-
-    comment: $ => token(prec(PREC.COMMENT, seq("#", /[^\n]*/))),
-
-    comma: $ => ',',
-
-    newline: $ => '\n',
-  }
+    _j8_string: $ => choice(
+      seq(
+        "u'",
+        repeat(choice(
+          /[^\\']+/,
+          $.escape_sequence,
+        )),
+        "'",
+      ),
+      seq(
+        "u'''",
+        repeat(choice(
+          /[^\\']+/,
+          $.escape_sequence,
+          "'",
+        )),
+        "'''",
+      ),
+    ),
+    _byte_string: $ => choice(
+      seq(
+        "b'",
+        repeat(choice(
+          /[^\\']+/,
+          $.escape_sequence,
+          $.escaped_bytes,
+        )),
+        "'",
+      ),
+      seq(
+        "b'''",
+        repeat(choice(
+          /[^\\']+/,
+          $.escape_sequence,
+          $.escaped_bytes,
+          "'",
+        )),
+        "'''",
+      ),
+    ),
+    _single_quotes_string: (_) => choice(/'[^'\\]*'/, /'''[^'\\]*'''/),
+    _raw_string: (_) => choice(/r'[^']*'/, /r'''[^']*'''/),
+    escaped_double_quote: $ => '\\"',
+    escaped_single_quote: $ => '\\\'',
+    escaped_newline: $ => '\\\n',
+    escaped_newline_value: $ => '\\n',
+    escape_special_characters: _ => token.immediate(seq('\\', choice( '\\', '$'))),
+    function_name: ($) => $.variable_name,
+    function_parameter: ($) => $.variable_name,
+    constant: ($) => $.variable_name,
+    glob: $ => seq($.word, repeat('|', $.word)),
+    eggex: $ => seq('/', /[^/]*/, '/'),
+    variable_name: _ => /[_a-zA-Z]\w*/,
+    command_name: $ => /[a-zA-Z0-9_][a-zA-Z0-9\.-_]*/,
+    positional_argument: ($) => /[1-9][0-9]?/,
+    number: ($) => choice(
+      // Dec
+      /\d+(?:(:?_\d+)*)?/,
+      // Hex
+      /0x[a-fA-F0-9]+(?:(?:_[a-fA-F0-9]+)*)?/,
+      // Oct
+      /0o[0-7]+(?:(?:_[0-7]+)*)?/,
+      // Binary
+      /0b[01]+(?:(?:_[01]+)*)?/,
+    ),
+    escaped_bytes: $ => /\\y[a-fA-F0-9]{2}/,
+    escape_sequence: ($) => choice(
+      /\\[\"\'\\\/bfnrt]/,
+      /\\u\{[0-9a-fA-F]{2,5}\}/,
+    ),
+    null: ($) => "null",
+    boolean: ($) => choice("true", "false"),
+    range_operator: ($) => "..<",
+    comment: (_) => token(prec(-10, /#.*/)),
+    word: (_) => token(seq(
+      choice(
+        noneOf("#", ...SPECIAL_CHARACTERS),
+        seq("\\", noneOf("\\s")),
+      ),
+      repeat(choice(
+        noneOf(...SPECIAL_CHARACTERS),
+        seq("\\", noneOf("\\s")),
+        "\\ ",
+      )),
+    )),
+    _terminator: (_) => choice(";", ";;", "&"),
+  },
 });
+
+/**
+ * Returns a regular expression that matches any character except the ones
+ * provided.
+ *
+ * @param  {...string} characters
+ *
+ * @returns {RegExp}
+ */
+function noneOf(...characters) {
+  const negatedString = characters.map((c) => c == "\\" ? "\\\\" : c).join("");
+  return new RegExp("[^" + negatedString + "]");
+}
+
+/**
+ * Creates a rule to optionally match one or more of the rules separated by a comma
+ *
+ * @param {RuleOrLiteral} rule
+ *
+ * @returns {ChoiceRule}
+ */
+function commaSep(rule) {
+  return optional(commaSep1(rule));
+}
+
+/**
+ * Creates a rule to match one or more of the rules separated by a comma
+ * Allows newline anywhere
+ *
+ * @param {RuleOrLiteral} rule
+ *
+ * @returns {SeqRule}
+ */
+function commaSep1(rule) {
+  return seq(repeat('\n'), rule, repeat(seq(repeat('\n'), ",", repeat('\n'), rule)), repeat('\n'));
+}
+
+/**
+ * Turns a list of rules into a choice of aliased token rules
+ *
+ * @param {number} precedence
+ *
+ * @param {(RegExp | string)[]} literals
+ *
+ * @returns {ChoiceRule}
+ */
+function tokenLiterals(precedence, ...literals) {
+  return choice(...literals.map((l) => token(prec(precedence, l))));
+}

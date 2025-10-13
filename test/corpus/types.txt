@@ -1,0 +1,298 @@
+==========================================
+Numbers
+==========================================
+var decimal = 42
+var big = 42_000
+
+var hex = 0x0010_ffff
+
+var octal = 0o755
+
+var binary = 0b0001_0000
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (number))
+  (variable_declaration
+    (variable_name)
+    (number))
+  (variable_declaration
+    (variable_name)
+    (number))
+  (variable_declaration
+    (variable_name)
+    (number))
+  (variable_declaration
+    (variable_name)
+    (number)))
+==========================================
+Number with leading _
+==========================================
+var big = _42000
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (variable_name)))
+==========================================
+Number with ending _
+:error
+==========================================
+var big = 42000_
+---
+==========================================
+Number with double _
+:error
+==========================================
+var big = 42__000
+---
+====================
+String interpolation
+====================
+var person = 'alice'
+echo "hi $person, $(echo bye)"  # => hi alice, bye
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (string))
+  (command_call
+    (command_name)
+    (string
+      (expansion
+        (variable_name))
+      (expansion
+        (command_call
+          (command_name)
+          (word)))))
+  (comment))
+======================
+String starting with $
+======================
+var x = '1'
+echo $"Number is $x"
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (string))
+  (command_call
+    (command_name)
+    (string
+      (expansion
+        (variable_name)))))
+=======================================
+Escape operator in double quotes string
+=======================================
+echo "\$ \" \\ "
+---
+(program
+  (command_call
+    (command_name)
+    (string
+      (escape_special_characters)
+      (escaped_double_quote)
+      (escape_special_characters))))
+====================
+Single quotes string
+====================
+var s = 'foo'
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (string)))
+===================================
+Single quotes string with backslash
+:error
+===================================
+var s = 'foo\''
+---
+====================
+Raw string
+====================
+var s = r'c:\Program Files\'
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (string)))
+================================
+J8 string with character escapes
+================================
+echo u' A is \u{41} \n line two, with backslash \\'
+---
+(program
+  (command_call
+    (command_name)
+    (string
+      (escape_sequence)
+      (escape_sequence)
+      (escape_sequence))))
+===========
+Byte string
+===========
+echo b'byte \yff'
+---
+(program
+  (command_call
+    (command_name)
+    (string
+      (escaped_bytes))))
+=================
+Multiline strings
+=================
+var s = """
+var sub: $x
+command sub: $(echo hi)
+expression sub: $[x + 3]
+"""
+---
+(program
+(variable_declaration
+(variable_name)
+(string
+  (expansion
+    (variable_name))
+  (expansion
+    (command_call
+      (command_name)
+      (word)))
+  (expansion
+    (binary_expression
+      (variable_name)
+      (number))))))
+==============================
+Multiline single quote strings
+==============================
+var s = '''
+$2.00  # literal $, no interpolation
+$1.99
+'''
+var j = u'''
+C\tD
+A\tB
+'''
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (string))
+  (variable_declaration
+    (variable_name)
+    (string
+      (escape_sequence)
+      (escape_sequence))))
+============
+Inner string
+============
+echo "hi $[d["key"]]"
+---
+(program
+  (command_call
+    (command_name)
+    (string
+      (expansion
+        (variable_name)
+        (string)))))
+
+===============
+Unclosed string
+:error
+===============
+var s = "start
+---
+===================
+String with newline
+===================
+var s = "start
+ "
+---
+(program
+  (variable_declaration
+    variable: (variable_name)
+    value: (string)))
+===========================
+String with escaped newline
+===========================
+var s = "start \
+ "
+---
+(program
+  (variable_declaration
+    variable: (variable_name)
+    value: (string)))
+
+==================
+Generated dict key
+==================
+var key = 'alice'
+var d2 = {[key ++ '_z']: 'ZZZ'}  # Computed key name
+echo $[d2.alice_z]   # => ZZZ
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (string))
+  (variable_declaration
+    (variable_name)
+    (dict
+      (binary_expression
+        (variable_name)
+        (string))
+      (string)))
+  (comment)
+  (command_call
+    (command_name)
+    (expansion
+      (variable_name)
+      (variable_name)))
+  (comment))
+
+=====
+Eggex
+=====
+var D = / digit{1,3} /
+var ip_pattern = / D '.' D '.' D '.' D'.' /
+
+var z = '192.168.0.1'
+if (z ~ ip_pattern) {           # Use the ~ operator to match
+  echo "$z looks like an IP address"
+}  # => 192.168.0.1 looks like an IP address
+
+if (z !~ / '.255' %end /) {
+  echo "doesn't end with .255"
+}  # => doesn't end with .255"
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (eggex))
+  (variable_declaration
+    (variable_name)
+    (eggex))
+  (variable_declaration
+    (variable_name)
+    (string))
+  (if_statement
+    (binary_expression
+      (variable_name)
+      (variable_name))
+    (block
+      (comment)
+      (command_call
+        (command_name)
+        (string
+          (expansion
+            (variable_name))))))
+  (comment)
+  (if_statement
+    (binary_expression
+      (variable_name)
+      (eggex))
+    (block
+      (command_call
+        (command_name)
+        (string))))
+  (comment))

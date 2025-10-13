@@ -1,0 +1,232 @@
+==========
+Loop cycle
+==========
+for item in (foods) {
+  echo $item
+}
+---
+(program
+  (for_statement
+    (variable_name)
+    (variable_name)
+    (block
+      (command_call
+        (command_name)
+        (expansion
+          (variable_name))))))
+
+===========================
+Loop cycle with index, item
+===========================
+for i, item in (foods) {
+  echo $item
+}
+---
+(program
+  (for_statement
+    (variable_name)
+    (variable_name)
+    (variable_name)
+    (block
+      (command_call
+        (command_name)
+        (expansion
+          (variable_name))))))
+
+==============================
+Loop cycle over multiple items
+==============================
+for i, word in README.md *.py {
+  echo $word
+}
+---
+(program
+  (for_statement
+    (variable_name)
+    (variable_name)
+    (word)
+    (word)
+    (block
+      (command_call
+        (command_name)
+        (expansion
+          (variable_name))))))
+
+==============================
+Loop cyple with range operator
+==============================
+for i in (3 ..< 5) {  # range operator ..<
+  echo $i
+}
+---
+(program
+  (for_statement
+    (variable_name)
+    (number)
+    (range_operator)
+    (number)
+    (block
+      (comment)
+      (command_call
+        (command_name)
+        (expansion
+          (variable_name))))))
+
+===========
+Debug print
+===========
+= y
+---
+(program
+  (expression_mode
+    (variable_name)))
+
+==========
+While loop
+==========
+while test --file lock {
+  sleep 1
+}
+var i = 3
+while (i < 6) {
+  echo "i = $i"
+  setvar i += 1
+}
+---
+(program
+  (while_statement
+    (command_call
+      (command_name)
+      (word)
+      (word))
+    (block
+      (command_call
+        (command_name)
+        (number))))
+  (variable_declaration
+    (variable_name)
+    (number))
+  (while_statement
+    (binary_expression
+      (variable_name)
+      (number))
+    (block
+      (command_call
+        (command_name)
+        (string
+          (expansion
+            (variable_name))))
+      (variable_assignment
+        (variable_name)
+        (number)))))
+============
+If statement
+============
+if test --file foo {
+  echo 'foo is a file'
+  rm --verbose foo     # delete it
+} elif test --dir foo {
+  echo 'foo is a directory'
+} else {
+  echo 'neither'
+}
+
+if ! grep alice /etc/passwd { 
+  echo 'alice is not a user'
+}
+
+if (num_beans > 0) {
+  echo 'so many beans'
+}
+
+var done = false
+if (not done) {        # negate with 'not' operator (contrast with !)
+  echo "we aren't done"
+}
+---
+(program
+  (if_statement
+    (command_call
+      (command_name)
+      (word)
+      (word))
+    (block
+      (command_call
+        (command_name)
+        (string))
+      (command_call
+        (command_name)
+        (word)
+        (word))
+      (comment))
+    (command_call
+      (command_name)
+      (word)
+      (word))
+    (block
+      (command_call
+        (command_name)
+        (string)))
+    (block
+      (command_call
+        (command_name)
+        (string))))
+  (if_statement
+    (command_call
+      (command_name)
+      (word)
+      (word))
+    (block
+      (command_call
+        (command_name)
+        (string))))
+  (if_statement
+    (binary_expression
+      (variable_name)
+      (number))
+    (block
+      (command_call
+        (command_name)
+        (string))))
+  (variable_declaration
+    (variable_name)
+    (boolean))
+  (if_statement
+    (unary_expression
+      (variable_name))
+    (block
+      (comment)
+      (command_call
+        (command_name)
+        (string)))))
+============
+Inline block
+============
+cd /tmp { echo $PWD }
+---
+(program
+  (command_call
+    (command_name)
+    (word)
+    (block
+      (command_call
+        (command_name)
+        (expansion
+          (variable_name))))))
+==============
+Case statement
+==============
+var s = 'README.md'
+case (s) {
+  *.py           { echo 'Python' }
+  *.cc | *.h     { echo 'C++' }
+  *              { echo 'Other' }
+}
+
+case (s) {
+  / dot* '.md' / { echo 'Markdown' }
+  (30 + 12)      { echo 'the integer 42' }
+  (else)         { echo 'neither' }
+}
+---
+

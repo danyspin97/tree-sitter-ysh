@@ -1,0 +1,204 @@
+===========================
+Var declaration with number
+===========================
+var x = 1
+---
+
+(program
+  (variable_declaration
+    (variable_name)
+    (number)))
+
+===========================
+Var declaration with spaces
+===========================
+v a r x = 1
+---
+(program
+  (command_call
+    (command_name)
+    (word)
+    (word)
+    (word)
+    (word)
+    (number)))
+================================
+Var declaration with string
+================================
+var x = "foo"
+---
+
+(program
+  (variable_declaration
+    (variable_name)
+    (string)))
+
+================================
+Var declaration with raw string
+================================
+var x = 'foo'
+---
+
+(program
+  (variable_declaration
+    (variable_name)
+    (string)))
+
+================================
+Var declaration with escaped newline
+================================
+var x = \
+    'foo'
+---
+
+(program
+  (variable_declaration
+    (variable_name)
+    (string)))
+
+================================
+Var declaration with newline
+:error
+================================
+var x =
+    'foo'
+---
+=================
+Const declaration
+=================
+const myconst = 'mystr'
+---
+(program
+  (constant_declaration
+    (variable_name)
+    (string)))
+
+===============================
+Var declaration with empty dict
+===============================
+var d = {}
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (dict)))
+=========================
+Var declaration with dict
+=========================
+var d = {name: 'bob', age: 42}
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (dict
+      (variable_name)
+      (string)
+      (variable_name)
+      (number))))
+
+================================
+Var declaration with empty list
+================================
+var foods = []
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (list)))
+==========================
+Var declaration with list
+==========================
+var foods = ['ale', 'bean']
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (list
+      (string)
+      (string))))
+=================================
+Var declaration with literal list
+=================================
+var myarray = :| ale bean |
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (literal_list
+      (word)
+      (word))))
+==========================
+Var assignment with setvar
+==========================
+setvar num_beans = 13
+---
+(program
+  (variable_assignment
+    (variable_name)
+    (number)))
+
+=================================
+Dict value assignment with setvar
+=================================
+setvar d.name = 'alice'
+---
+(program
+  (variable_assignment
+    (variable_name)
+    (variable_name)
+    (string)))
+
+=====================
+Dict value assignment
+:error
+=====================
+var d.name = 'alice'
+---
+=================================
+Var assignment with += operator
+=================================
+setvar x += 5
+---
+(program
+  (variable_assignment
+    (variable_name)
+    (number)))
+
+=========================
+Variable expansion for :-
+=========================
+echo ${not_defined:-'default'}
+---
+(program
+  (command_call
+    (command_name)
+    (expansion
+      (variable_name)
+      (string))))
+=========
+Setglobal
+=========
+setglobal ENV.PYTHONPATH = '.'
+---
+(program
+  (variable_assignment
+    (variable_name)
+    (variable_name)
+    (string)))
+===============
+Chain functions
+===============
+var trimmed = line.trim() => upper()  # 'ALE BEAN'
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (binary_expression
+      (variable_name)
+      (method_call
+        (function_name
+          (variable_name)))
+      (function_call
+        (function_name
+          (variable_name)))))
+  (comment))

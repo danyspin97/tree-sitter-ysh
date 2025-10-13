@@ -1,0 +1,101 @@
+================================
+Binary expression with addiction
+================================
+var x = 1 + y
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (binary_expression
+      (number)
+      (variable_name))))
+================================
+Complex expression with addiction
+================================
+var x = 1 + 2 + 3
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (binary_expression
+      (binary_expression
+        (number)
+        (number))
+      (number))))
+================================
+Binary expressions
+================================
+var x = 1 - 2
+var y = 1 * 2
+var z = 1 / 2
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (binary_expression
+      (number)
+      (number)))
+  (variable_declaration
+    (variable_name)
+    (binary_expression
+      (number)
+      (number)))
+  (variable_declaration
+    (variable_name)
+    (binary_expression
+      (number)
+      (number))))
+
+================================
+Precedence
+================================
+var x = 1 + y * 3
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (binary_expression
+      (number)
+      (binary_expression
+        (variable_name)
+        (number)))))
+
+========================================
+Mathematical expression with parenthesis
+========================================
+var x = ((1 + y) * 3) + 3
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (binary_expression
+      (binary_expression
+        (binary_expression
+          (number)
+          (variable_name))
+        (number))
+      (number))))
+=======
+Dict access in arithmetic expression
+=======
+var z = myvar.b * 2
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (binary_expression
+      (variable_name)
+      (variable_name)
+      (number))))
+=======
+List access in arithmetic expression
+=======
+var z = myvar[0] * 2
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (binary_expression
+      (variable_name)
+      (number)
+      (number))))

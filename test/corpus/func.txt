@@ -1,0 +1,84 @@
+===========================
+Simple function declaration
+===========================
+func foo() {
+  var x = ''
+}
+---
+(program
+  (function_definition
+    (function_name
+      (variable_name))
+    (parameter_list)
+    (func_block
+      (variable_declaration
+        (variable_name)
+        (string)))))
+===========================
+Positional parameter
+===========================
+func foo(bar, foobar) {
+  var x = ''
+}
+---
+(program
+  (function_definition
+    (function_name
+      (variable_name))
+    (parameter_list
+      (function_parameter
+        (variable_name))
+      (function_parameter
+        (variable_name)))
+    (func_block
+      (variable_declaration
+        (variable_name)
+        (string)))))
+===========================
+Complex function
+===========================
+func f(p1, p2, ...rest_pos; n1=42, n2='foo', ...rest_named) {
+    var x = ''
+}
+---
+(program
+  (function_definition
+    (function_name
+      (variable_name))
+    (parameter_list
+      (function_parameter
+        (variable_name))
+      (function_parameter
+        (variable_name))
+      (rest_of_arguments
+        (variable_name))
+      (named_parameter
+        (function_parameter
+          (variable_name))
+        (number))
+      (named_parameter
+        (function_parameter
+          (variable_name))
+        (string))
+      (rest_of_arguments
+            (variable_name)))
+        (func_block
+          (variable_declaration
+            (variable_name)
+            (string)))))
+=======================================
+Func call with word and named arguments
+=======================================
+call myRepeat('z', 3, special=true)
+---
+(program
+  (expression_mode
+    (function_call
+      (function_name
+        (variable_name))
+      (string)
+      (number)
+      (named_parameter
+        (function_parameter
+          (variable_name))
+        (boolean)))))

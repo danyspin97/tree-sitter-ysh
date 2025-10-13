@@ -1,0 +1,112 @@
+=========================
+Command with no arguments
+=========================
+cat
+---
+(program
+  (command_call
+    (command_name)))
+
+==============================
+Command with literal arguments
+==============================
+echo "foo" bar 12
+---
+(program
+  (command_call
+    (command_name)
+    (string)
+    (word)
+    (number)))
+
+==============================
+Command parameter with # in it
+==============================
+echo not#comment
+---
+(program
+ (command_call
+  (command_name)
+  (word)))
+==================
+Multiline commands
+==================
+... find /bin               # traverse this directory and
+    -type f -a -executable  # print executable files
+  | sort -r                 # reverse sort
+  | head -n 30              # limit to 30 files
+  ;
+---
+============
+Call builtin
+============
+call myplace->setValue(42)
+---
+(program
+  (expression_mode
+    (variable_name)
+    (method_call
+      (function_name
+        (variable_name))
+      (number))))
+=======================================
+Expansion in command with default value
+=======================================
+echo ${not_defined:-'default'}
+---
+(program
+  (command_call
+    (command_name)
+    (expansion
+      (variable_name)
+      (string))))
+=======================================
+Command call with positional, typed arg
+=======================================
+pp value ([1, 2])
+---
+(program
+  (command_call
+    (command_name)
+    (word)
+    (parameter_list_call
+      (list
+        (number)
+        (number)))))
+============
+Array splice
+============
+write @foods
+---
+(program
+  (command_call
+    (command_name)
+    (expansion
+      (variable_name))))
+
+=====
+Pipes
+=====
+cat myfile.csv | cut -d" " -f2 | sort | uniq
+---
+(program
+  (piped_statement
+    (piped_statement
+      (piped_statement
+        (command_call
+          (command_name)
+          (word))
+        (command_call
+          (command_name)
+          (word)
+          (string)
+          (word)))
+      (command_call
+        (command_name)))
+    (command_call
+      (command_name))))
+========================
+Change environment value
+========================
+PYTHONPATH=vendor echo lol
+---

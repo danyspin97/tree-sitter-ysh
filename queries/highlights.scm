@@ -1,39 +1,132 @@
-"for" @keyword.repeat
-"in" @keyword.repeat
+(string) @string
+
+[
+  "var"
+  "setvar"
+  "const"
+  "setglobal"
+  "call"
+] @keyword
+
+[
+  "for"
+  "in"
+  "while"
+] @keyword.repeat
+
+[
+ "if"
+ "elif"
+ "else"
+ "case"
+] @keyword.conditional
+
 (number) @number
 
 ((comment)+ @comment)
 
-"func" @keyword.function
-(function_identifier) @function
-(function_parameter) @variable.parameter
+((command_name) @function.builtin
+  (#any-of? @function.builtin "echo" "type" "shopt" "json" "write" "assert" "fork" "forkwait"))
+((command_name) @keyword.import
+  (#eq? @keyword.import "use"))
+((command_name) "=" @keyword.debug)
+((command_name) @function.call (#set! priority 90))
+
+[
+  "func"
+  "proc"
+] @keyword.function
+
+"return" @keyword.return
+
+[
+  "!"
+  "+"
+  "-"
+  "*"
+  "/"
+  "**"
+  "<"
+  ">"
+  "|"
+  "^"
+  "&"
+  ">>"
+  "<<"
+  "%"
+  "<="
+  ">="
+  "="
+  "=="
+  "==="
+  "~=="
+  "~"
+  "!~"
+  "~~"
+  "!~~"
+  "++"
+  ":-"
+  "=>"
+  "."
+  "->"
+  (range_operator)
+] @operator
+
+[
+  "or"
+  "and"
+  "not"
+] @keyword.operator
 
 (boolean) @boolean
-(string) @string
-(escape_sequence) @string.escape
 
-"setvar" @keyword
-"var" @keyword
-"const" @keyword
-(variable) @variable
-(positional_argument) @variable
+variable: (variable_name) @variable
+(variable_assignment key: (variable_name) @variable.member)
 
-(dollar_token) @punctuation.special
+(command_call (word) @variable.parameter)
 
-(function_name) @function
-(function_call) @function.call
-((function_name) @function.builtin (#any-of? @function.builtin "echo" "cat"))
+; (dollar_token) @punctuation.special
 
-(empty_array) @punctuation.brackets
-(empty_dict) @punctuation.brackets
+(function_definition (function_name) @function.method)
+(function_call call: (function_name) @function.call
+             (#set! priority 90))
+(method_call method: (function_name) @function.method.call)
+(function_parameter) @variable.parameter
+(rest_of_arguments) @variable.parameter
 
-(constant) @constant
+[
+  (escape_sequence)
+  (escaped_bytes)
+  (escape_special_characters)
+  (escaped_newline)
+  (escaped_double_quote)
+  (escaped_single_quote)
+  (escaped_newline_value)
+] @string.escape
 
-(left_paren) @punctuation.bracket
-(left_bracket) @punctuation.bracket
-(right_paren) @punctuation.bracket
-(right_bracket) @punctuation.bracket
+; (function_call) @function.call
+; ((function_name) @function.builtin (#any-of? @function.builtin "echo" "cat"))
 
-(range_operator) @operator
-(equal_sign) @operator
-(comma) @punctuation.delimiter
+; (constant) @constant
+
+[
+  "("
+  ")"
+  "["
+  "]"
+  "{"
+  "}"
+  "/"
+] @punctuation.bracket
+
+(literal_list [ ":|" "|" ] @punctuation.bracket)
+
+"," @punctuation.delimiter
+
+[
+ "$"
+ ";"
+ "@"
+] @punctuation.special
+
+(ERROR) @error
