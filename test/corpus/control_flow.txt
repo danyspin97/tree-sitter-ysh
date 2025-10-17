@@ -229,4 +229,52 @@ case (s) {
   (else)         { echo 'neither' }
 }
 ---
-
+(program
+  (variable_declaration
+    (variable_name)
+    (string))
+  (case_statement
+    (variable_name)
+    (case_condition
+      (glob
+        (word))
+      (block
+        (command_call
+          (command_name)
+          (string))))
+    (case_condition
+      (glob
+        (word)
+        (word))
+      (block
+        (command_call
+          (command_name)
+          (string))))
+    (case_condition
+      (glob
+        (word))
+      (block
+        (command_call
+          (command_name)
+          (string)))))
+  (case_statement
+    (variable_name)
+    (case_condition
+      (eggex)
+      (block
+        (command_call
+          (command_name)
+          (string))))
+    (case_condition
+      (binary_expression
+        (number)
+        (number))
+          (block
+            (command_call
+              (command_name)
+              (string))))
+        (case_condition
+          (block
+            (command_call
+              (command_name)
+              (string))))))
