@@ -82,6 +82,8 @@
 (boolean) @boolean
 
 variable: (variable_name) @variable
+((variable_name) @variable
+             (#set! priority 10))
 (variable_assignment key: (variable_name) @variable.member)
 
 (command_call (word) @variable.parameter)
@@ -89,6 +91,7 @@ variable: (variable_name) @variable
 ; (dollar_token) @punctuation.special
 
 (function_definition (function_name) @function.method)
+(proc_definition (function_name) @function.method)
 (function_call call: (function_name) @function.call
              (#set! priority 90))
 (method_call method: (function_name) @function.method.call)
