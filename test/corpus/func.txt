@@ -66,6 +66,22 @@ func f(p1, p2, ...rest_pos; n1=42, n2='foo', ...rest_named) {
           (variable_declaration
             (variable_name)
             (string)))))
+============================
+Catch all as single argument
+============================
+func f(...rest_pos) { echo worked }
+---
+(program
+  (function_definition
+    (function_name
+      (variable_name))
+    (parameter_list
+      (rest_of_arguments
+        (variable_name)))
+    (func_block
+      (command_call
+        (command_name)
+        (word)))))
 =======================================
 Func call with word and named arguments
 =======================================

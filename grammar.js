@@ -112,29 +112,24 @@ module.exports = grammar({
     piped_statement: $ => prec.left(seq( $._statement, '|', $._statement)),
     function_definition: ($) => seq("func", $.function_name, $.parameter_list, $.func_block),
     proc_definition: ($) => seq("proc", $.function_name, $.proc_parameter_list, $.proc_block),
-    rest_of_arguments: ($) => seq(",", "...", $.variable_name),
+    rest_of_arguments: ($) => seq("...", $.variable_name),
     parameter_list: ($) => seq(
       "(",
-      commaSep($.function_parameter),
-      optional($.rest_of_arguments),
+      rest_of_arguments($, $.function_parameter),
       optional(seq(
         ";",
-        commaSep($.named_parameter),
-        optional($.rest_of_arguments),
+        rest_of_arguments($, $.named_parameter),
       )),
       ")",
     ),
     proc_parameter_list: ($) => seq(
       "(",
-      commaSep($.function_parameter),
-      optional($.rest_of_arguments),
+      rest_of_arguments($, $.function_parameter),
       optional(seq(';',
-        commaSep($.function_parameter),
-        optional($.rest_of_arguments),
+        rest_of_arguments($, $.function_parameter),
         optional(seq(
           ";",
-          commaSep($.named_parameter),
-          optional($.rest_of_arguments),
+          rest_of_arguments($, $.named_parameter),
           optional(seq(';',
             optional($.function_parameter)))
         ))
@@ -144,12 +139,10 @@ module.exports = grammar({
     parameter_list_call: ($) =>
       seq(
         "(",
-        commaSep($._expression),
-        optional($.rest_of_arguments),
+        rest_of_arguments($, $._expression),
         optional(seq(
           ";",
-          commaSep($.named_parameter),
-          optional($.rest_of_arguments),
+          rest_of_arguments($, $.named_parameter),
         )),
         ")",
       ),
@@ -558,4 +551,9 @@ function commaSep1(rule) {
  */
 function tokenLiterals(precedence, ...literals) {
   return choice(...literals.map((l) => token(prec(precedence, l))));
+}
+
+function rest_of_arguments(self, rule) {
+  return choice(seq(commaSep1(rule), optional(seq(',', self.rest_of_arguments))),
+      optional(self.rest_of_arguments));
 }
