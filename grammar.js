@@ -377,7 +377,7 @@ module.exports = grammar({
         ["|", PREC.BITWISE_OR],
         ["^", PREC.BITWISE_XOR],
         ["&", PREC.BITWISE_AND],
-        [choice("==", "!=", "===", "~=="), PREC.EQUALITY],
+        [choice("==", "!=", "!==", "===", "~=="), PREC.EQUALITY],
         [choice("<", ">", "<=", ">=", "~", "!~", "~~", "!~~"), PREC.COMPARE],
         [choice("<<", ">>"), PREC.SHIFT],
         [choice("+", "-", "++"), PREC.ADD],
