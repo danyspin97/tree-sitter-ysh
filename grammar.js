@@ -299,7 +299,6 @@ module.exports = grammar({
       choice($.variable_name, seq('[', $._expression, ']')), ":", $._expression)), "}"),
     list: ($) => seq("[", commaSep($._expression), "]"),
     literal_list: $ => seq(':|', repeat($.word), '|'),
-    glob: ($) => seq(repeat1(/\w+/)),
     named_parameter: ($) => seq(
       $.function_parameter,
       repeat('\n'),
@@ -473,7 +472,7 @@ module.exports = grammar({
     function_name: ($) => $.variable_name,
     function_parameter: ($) => $.variable_name,
     constant: ($) => $.variable_name,
-    glob: $ => seq($.word, repeat('|', $.word)),
+    glob: $ => seq($.word, repeat(seq('|', $.word))),
     eggex: $ => seq('/', /[^/]*/, '/'),
     variable_name: _ => /[_a-zA-Z]\w*/,
     command_name: $ => /[a-zA-Z0-9_][a-zA-Z0-9\.-_]*/,
