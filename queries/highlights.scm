@@ -84,11 +84,18 @@
 variable: (variable_name) @variable
 ((variable_name) @variable
              (#set! priority 10))
-(variable_assignment key: (variable_name) @variable.member)
+(variable_assignment key: (variable_name) @property)
 
 (command_call (word) @variable.parameter)
 
 ; (dollar_token) @punctuation.special
+
+member: (variable_name) @variable.member
+key: (variable_name) @variable.member
+             (#set! priority 10)
+
+((variable_name) @variable.builtin
+                 (#eq? @variable.builtin "_error"))
 
 (function_definition (function_name) @function.method)
 (proc_definition (function_name) @function.method)

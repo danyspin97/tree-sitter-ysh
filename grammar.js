@@ -266,7 +266,7 @@ module.exports = grammar({
       choice(
         seq(
           ".",
-          field("key", $.variable_name),
+          field("member", $.variable_name),
         ),
         prec.left(seq(
           "[",
@@ -289,7 +289,7 @@ module.exports = grammar({
       ),
     )),
     dict: ($) => seq("{", commaSep(seq(
-      choice($.variable_name, seq('[', $._expression, ']')), ":", $._expression)), "}"),
+      choice(field('key', $.variable_name), seq('[', field('key', $._expression, ']'))), ":", $._expression)), "}"),
     list: ($) => seq("[", commaSep($._expression), "]"),
     literal_list: $ => seq(':|', repeat($.word), '|'),
     named_parameter: ($) => seq(

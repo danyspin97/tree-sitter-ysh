@@ -1910,7 +1910,7 @@
                 },
                 {
                   "type": "FIELD",
-                  "name": "key",
+                  "name": "member",
                   "content": {
                     "type": "SYMBOL",
                     "name": "variable_name"
@@ -2178,8 +2178,12 @@
                       "type": "CHOICE",
                       "members": [
                         {
-                          "type": "SYMBOL",
-                          "name": "variable_name"
+                          "type": "FIELD",
+                          "name": "key",
+                          "content": {
+                            "type": "SYMBOL",
+                            "name": "variable_name"
+                          }
                         },
                         {
                           "type": "SEQ",
@@ -2240,8 +2244,12 @@
                             "type": "CHOICE",
                             "members": [
                               {
-                                "type": "SYMBOL",
-                                "name": "variable_name"
+                                "type": "FIELD",
+                                "name": "key",
+                                "content": {
+                                  "type": "SYMBOL",
+                                  "name": "variable_name"
+                                }
                               },
                               {
                                 "type": "SEQ",
