@@ -235,9 +235,15 @@ module.exports = grammar({
       prec.left(seq(
         optional("!"),
         $.command_name,
-        repeat(choice($._literal, $.word)),
-        optional($.parameter_list_call),
-        optional($.block),
+        repeat(
+          choice(
+            $._literal,
+            $.redirection,
+            $.word,
+          ),
+        ),
+        optional(seq($.parameter_list_call, repeat($.redirection))),
+        optional(seq($.block, repeat($.redirection))),
       )),
     multiline_command_call: ($) =>
       seq(
@@ -473,8 +479,28 @@ module.exports = grammar({
     },
     unary_expression: ($) =>
       seq(
-        "not",
+        choice("not", "&", "+"),
         $._expression,
+      ),
+    redirection: ($) =>
+      prec(
+        20,
+        seq(
+          optional(alias($._decimal, $.number)),
+          choice(
+            "<",
+            "<>",
+            ">&",
+            "&>",
+            ">",
+            ">|",
+            ">>",
+            "&>>",
+            ">>&",
+            "<<<",
+          ),
+          choice($.word, $._literal),
+        ),
       ),
     _double_quotes_string: ($) =>
       seq(
@@ -558,10 +584,9 @@ module.exports = grammar({
     variable_name: (_) => /[_a-zA-Z]\w*/,
     command_name: (_) => /[a-zA-Z0-9_][a-zA-Z0-9\.-_]*/,
     positional_argument: (_) => /[1-9][0-9]?/,
-    number: (_) =>
+    number: ($) =>
       choice(
-        // Dec
-        /\d+(?:(:?_\d+)*)?/,
+        $._decimal,
         // Hex
         /0x[a-fA-F0-9]+(?:(?:_[a-fA-F0-9]+)*)?/,
         // Oct
@@ -569,6 +594,7 @@ module.exports = grammar({
         // Binary
         /0b[01]+(?:(?:_[01]+)*)?/,
       ),
+    _decimal: (_) => /\d+(?:(:?_\d+)*)?/,
     escaped_bytes: (_) => /\\y[a-fA-F0-9]{2}/,
     escape_sequence: (_) =>
       choice(

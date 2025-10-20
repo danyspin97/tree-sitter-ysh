@@ -73,6 +73,18 @@ pp value ([1, 2])
       (list
         (number)
         (number)))))
+=============================
+Command call with value.Place
+=============================
+json read (&mydict)
+---
+(program
+  (command_call
+    (command_name)
+    (word)
+    (parameter_list_call
+      (unary_expression
+        (variable_name)))))
 ============
 Array splice
 ============
@@ -110,3 +122,57 @@ Change environment value
 ========================
 PYTHONPATH=vendor echo lol
 ---
+===========
+Redirection
+===========
+echo hi > tmp.txt
+ls 2> errors.txt
+sort < tmp.txt
+ls /tmp 2>errors.txt
+echo 'fatal error' >&2
+json write > foo.json ({x: 42})
+json read (&mydict) < foo.json
+---
+(program
+  (command_call
+    (command_name)
+    (word)
+    (redirection
+      (word)))
+  (command_call
+    (command_name)
+    (redirection
+      (number)
+      (word)))
+  (command_call
+    (command_name)
+    (redirection
+      (word)))
+  (command_call
+    (command_name)
+    (word)
+    (redirection
+      (number)
+      (word)))
+  (command_call
+    (command_name)
+    (string)
+    (redirection
+      (number)))
+  (command_call
+    (command_name)
+    (word)
+    (redirection
+      (word))
+    (parameter_list_call
+      (dict
+        (variable_name)
+        (number))))
+  (command_call
+    (command_name)
+    (word)
+    (parameter_list_call
+      (unary_expression
+        (variable_name)))
+    (redirection
+      (word))))
