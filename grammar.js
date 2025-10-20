@@ -62,6 +62,10 @@ module.exports = grammar({
     /\\( |\t|\v|\f)/,
     $.comment,
   ],
+  externals: ($) => [
+    $.environment_variable_name, // enum 0
+    $.environment_equals, // enum 1
+  ],
   supertypes: ($) => [
     $._statement,
   ],
@@ -234,6 +238,7 @@ module.exports = grammar({
     command_call: ($) =>
       prec.left(seq(
         optional("!"),
+        repeat($.environment),
         $.command_name,
         repeat(
           choice(
@@ -379,6 +384,14 @@ module.exports = grammar({
             $._variable_access,
             $.method_call,
           )),
+        ),
+      ),
+    environment: ($) =>
+      seq(
+        alias($.environment_variable_name, $.variable_name),
+        choice(
+          seq(alias($.environment_equals, "="), choice($.word, $._literal)),
+          "=",
         ),
       ),
     _primary: ($) =>
@@ -581,7 +594,7 @@ module.exports = grammar({
     constant: ($) => $.variable_name,
     glob: ($) => seq($.word, repeat(seq("|", $.word))),
     eggex: (_) => seq("/", /[^/]*/, "/"),
-    variable_name: (_) => /[_a-zA-Z]\w*/,
+    variable_name: (_) => token(/[_a-zA-Z]\w*/),
     command_name: (_) => /[a-zA-Z0-9_][a-zA-Z0-9\.-_]*/,
     positional_argument: (_) => /[1-9][0-9]?/,
     number: ($) =>

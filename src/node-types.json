@@ -862,6 +862,10 @@
           "named": true
         },
         {
+          "type": "environment",
+          "named": true
+        },
+        {
           "type": "expansion",
           "named": true
         },
@@ -1254,6 +1258,41 @@
     "type": "eggex",
     "named": true,
     "fields": {}
+  },
+  {
+    "type": "environment",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "boolean",
+          "named": true
+        },
+        {
+          "type": "expansion",
+          "named": true
+        },
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "string",
+          "named": true
+        },
+        {
+          "type": "variable_name",
+          "named": true
+        },
+        {
+          "type": "word",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "escape_sequence",

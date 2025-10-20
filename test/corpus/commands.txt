@@ -118,10 +118,30 @@ cat myfile.csv | cut -d" " -f2 | sort | uniq
     (command_call
       (command_name))))
 ========================
-Change environment value
+PREFIX environment value
 ========================
-PYTHONPATH=vendor echo lol
+PYTHONPATH=vendor python3
+MYENV= echo noop
+PATH="$PATH:/usr/local/bin" mycmd
 ---
+(program
+  (command_call
+    (environment
+      (variable_name)
+      (word))
+    (command_name))
+  (command_call
+    (environment
+      (variable_name))
+    (command_name)
+    (word))
+  (command_call
+    (environment
+      (variable_name)
+      (string
+        (expansion
+          (variable_name))))
+    (command_name)))
 ===========
 Redirection
 ===========
