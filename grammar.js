@@ -66,7 +66,7 @@ module.exports = grammar({
     $._statement,
   ],
   reserved: {
-    global: ($) => [
+    global: (_) => [
       "var",
       "setvar",
       "setglobal",
@@ -77,28 +77,32 @@ module.exports = grammar({
       "if",
       "elif",
       "else",
-      "case"
+      "case",
     ],
   },
   rules: {
     program: ($) => optional($._statements),
     _statements: ($) =>
-      seq(repeat(choice(seq($._statement, choice($._terminator, /\n/)), /\n/)), $._statement),
-    _statement: ($) => choice(
-      $.variable_declaration,
-      $.variable_assignment,
-      $.constant_declaration,
-      // $.multiline_command_call,
-      $.expression_mode,
-      $.command_call,
-      $.function_definition,
-      $.proc_definition,
-      $.for_statement,
-      $.while_statement,
-      $.if_statement,
-      $.case_statement,
-      $.piped_statement,
-    ),
+      seq(
+        repeat(choice(seq($._statement, choice($._terminator, /\n/)), /\n/)),
+        $._statement,
+      ),
+    _statement: ($) =>
+      choice(
+        $.variable_declaration,
+        $.variable_assignment,
+        $.constant_declaration,
+        // $.multiline_command_call,
+        $.expression_mode,
+        $.command_call,
+        $.function_definition,
+        $.proc_definition,
+        $.for_statement,
+        $.while_statement,
+        $.if_statement,
+        $.case_statement,
+        $.piped_statement,
+      ),
     _expression: ($) =>
       choice(
         $.function_call,
@@ -109,33 +113,39 @@ module.exports = grammar({
         $.null,
         $._paren_expression,
       ),
-    piped_statement: $ => prec.left(seq( $._statement, '|', $._statement)),
-    function_definition: ($) => seq("func", $.function_name, $.parameter_list, $.func_block),
-    proc_definition: ($) => seq("proc", $.function_name, $.proc_parameter_list, $.proc_block),
+    piped_statement: ($) => prec.left(seq($._statement, "|", $._statement)),
+    function_definition: ($) =>
+      seq("func", $.function_name, $.parameter_list, $.func_block),
+    proc_definition: ($) =>
+      seq("proc", $.function_name, $.proc_parameter_list, $.proc_block),
     rest_of_arguments: ($) => seq("...", $.variable_name),
-    parameter_list: ($) => seq(
-      "(",
-      rest_of_arguments($, $.function_parameter),
-      optional(seq(
-        ";",
-        rest_of_arguments($, $.named_parameter),
-      )),
-      ")",
-    ),
-    proc_parameter_list: ($) => seq(
-      "(",
-      rest_of_arguments($, $.function_parameter),
-      optional(seq(';',
+    parameter_list: ($) =>
+      seq(
+        "(",
         rest_of_arguments($, $.function_parameter),
         optional(seq(
           ";",
           rest_of_arguments($, $.named_parameter),
-          optional(seq(';',
-            optional($.function_parameter)))
-        ))
-      )),
-      ")",
-    ),
+        )),
+        ")",
+      ),
+    proc_parameter_list: ($) =>
+      seq(
+        "(",
+        rest_of_arguments($, $.function_parameter),
+        optional(
+          seq(
+            ";",
+            rest_of_arguments($, $.function_parameter),
+            optional(seq(
+              ";",
+              rest_of_arguments($, $.named_parameter),
+              optional(seq(";", optional($.function_parameter))),
+            )),
+          ),
+        ),
+        ")",
+      ),
     parameter_list_call: ($) =>
       seq(
         "(",
@@ -146,32 +156,59 @@ module.exports = grammar({
         )),
         ")",
       ),
-    block: $ => seq(
-      '{',
-        repeat(choice('\n', '\\{', '\\}')),
+    block: ($) =>
+      seq(
+        "{",
+        repeat(choice("\n", "\\{", "\\}")),
         $._statement,
-        repeat(choice('\\{', '\\}', '\n',
-          seq(choice($._terminator, '\n'), $._statement))),
-      '}'
-    ),
-    func_block: $ => seq(
-      '{',
-        repeat(choice('\n', '\\{', '\\}')),
+        repeat(
+          choice(
+            "\\{",
+            "\\}",
+            "\n",
+            seq(choice($._terminator, "\n"), $._statement),
+          ),
+        ),
+        "}",
+      ),
+    func_block: ($) =>
+      seq(
+        "{",
+        repeat(choice("\n", "\\{", "\\}")),
         choice($._statement, $.func_return),
-        repeat(choice('\\{', '\\}', '\n',
-          seq(choice($._terminator, '\n'), choice($._statement, $.func_return)))),
-      '}'
-    ),
-    func_return: $ => seq('return', $._paren_expression),
-    proc_block: $ => seq(
-      '{',
-        repeat(choice('\n', '\\{', '\\}')),
+        repeat(
+          choice(
+            "\\{",
+            "\\}",
+            "\n",
+            seq(
+              choice($._terminator, "\n"),
+              choice($._statement, $.func_return),
+            ),
+          ),
+        ),
+        "}",
+      ),
+    func_return: ($) => seq("return", $._paren_expression),
+    proc_block: ($) =>
+      seq(
+        "{",
+        repeat(choice("\n", "\\{", "\\}")),
         choice($._statement, $.proc_return),
-        repeat(choice('\\{', '\\}', '\n',
-          seq(choice($._terminator, '\n'), choice($._statement, $.proc_return)))),
-      '}'
-    ),
-    proc_return: $ => seq('return', $._literal),
+        repeat(
+          choice(
+            "\\{",
+            "\\}",
+            "\n",
+            seq(
+              choice($._terminator, "\n"),
+              choice($._statement, $.proc_return),
+            ),
+          ),
+        ),
+        "}",
+      ),
+    proc_return: ($) => seq("return", $._literal),
     variable_declaration: ($) =>
       seq(
         "var",
@@ -194,21 +231,23 @@ module.exports = grammar({
         "=",
         $._expression,
       ),
-    command_call: $ => prec.left(seq(
-      optional('!'),
-      $.command_name,
-      repeat(choice($._literal, $.word)),
-      optional($.parameter_list_call),
-      optional($.block),
-    )),
-    multiline_command_call: $ => seq(
-      '...',
-      $.command_name,
-      repeat(seq(choice($.command_line, $.comment), '\n')),
-      optional($.command_line)
-    ),
-    command_line: $ => seq(repeat1(choice($._literal, $.word))),
-    dollar_token: ($) => "$",
+    command_call: ($) =>
+      prec.left(seq(
+        optional("!"),
+        $.command_name,
+        repeat(choice($._literal, $.word)),
+        optional($.parameter_list_call),
+        optional($.block),
+      )),
+    multiline_command_call: ($) =>
+      seq(
+        "...",
+        $.command_name,
+        repeat(seq(choice($.command_line, $.comment), "\n")),
+        optional($.command_line),
+      ),
+    command_line: ($) => seq(repeat1(choice($._literal, $.word))),
+    dollar_token: (_) => "$",
     for_statement: ($) =>
       seq(
         "for",
@@ -227,30 +266,41 @@ module.exports = grammar({
       choice(
         $._for_range,
         $._paren_expression,
-        prec.left(field("value", repeat1(choice(
-          $._literal, $.word
-        )))),
+        prec.left(field(
+          "value",
+          repeat1(choice(
+            $._literal,
+            $.word,
+          )),
+        )),
       ),
-    _for_range: ($) => seq("(", $._expression, $.range_operator, $._expression, ")"),
-    _control_flow_condition: $ => choice($._paren_expression, $.command_call),
-    while_statement: $ => prec.right(seq('while', $._control_flow_condition, $.block)),
-    if_statement: $ => seq(
-      'if',
-      $._control_flow_condition,
-      $.block,
-      repeat(seq('elif', $._control_flow_condition, $.block)),
-      optional(seq('else', $.block))
-    ),
-    case_statement: $ => prec.right(seq(
-      "case",
-      $._paren_expression,
-      "{",
-        repeat(choice('\n', $.case_condition)),
-      "}",
-    )),
-    case_condition: $ => seq(
-      choice($.glob, $._paren_expression, $.eggex, seq('(', 'else', ')')), repeat('\n'), $.block
-    ),
+    _for_range: ($) =>
+      seq("(", $._expression, $.range_operator, $._expression, ")"),
+    _control_flow_condition: ($) => choice($._paren_expression, $.command_call),
+    while_statement: ($) =>
+      prec.right(seq("while", $._control_flow_condition, $.block)),
+    if_statement: ($) =>
+      seq(
+        "if",
+        $._control_flow_condition,
+        $.block,
+        repeat(seq("elif", $._control_flow_condition, $.block)),
+        optional(seq("else", $.block)),
+      ),
+    case_statement: ($) =>
+      prec.right(seq(
+        "case",
+        $._paren_expression,
+        "{",
+        repeat(choice("\n", $.case_condition)),
+        "}",
+      )),
+    case_condition: ($) =>
+      seq(
+        choice($.glob, $._paren_expression, $.eggex, seq("(", "else", ")")),
+        repeat("\n"),
+        $.block,
+      ),
     _paren_expression: ($) =>
       seq(
         "(",
@@ -262,107 +312,136 @@ module.exports = grammar({
         "return",
         $._paren_expression,
       ),
-    _variable_access: ($) => seq(
-      choice(
-        seq(
-          ".",
-          field("member", $.variable_name),
-        ),
-        prec.left(seq(
-          "[",
-          field("key", $._expression),
-          "]",
-        )),
-      ),
-    ),
-    expression_mode: $ => prec.left(seq(
-      choice('call', '='),
-      $._expression,
-    )),
-    function_call: $ => prec.left(seq(
+    _variable_access: ($) =>
       seq(
-        field('call', $.function_name),
-        '(',
-          commaSep($._expression),
-          optional(seq(choice(',', ';'), commaSep($.named_parameter))),
-        ')'
+        choice(
+          seq(
+            ".",
+            field("member", $.variable_name),
+          ),
+          prec.left(seq(
+            "[",
+            field("key", $._expression),
+            "]",
+          )),
+        ),
       ),
-    )),
-    dict: ($) => seq("{", commaSep(seq(
-      choice(field('key', $.variable_name), seq('[', field('key', $._expression, ']'))), ":", $._expression)), "}"),
+    expression_mode: ($) =>
+      prec.left(seq(
+        choice("call", "="),
+        $._expression,
+      )),
+    function_call: ($) =>
+      prec.left(seq(
+        seq(
+          field("call", $.function_name),
+          "(",
+          commaSep($._expression),
+          optional(seq(choice(",", ";"), commaSep($.named_parameter))),
+          ")",
+        ),
+      )),
+    dict: ($) =>
+      seq(
+        "{",
+        commaSep(seq(
+          choice(
+            field("key", $.variable_name),
+            seq("[", field("key", $._expression), "]"),
+          ),
+          ":",
+          $._expression,
+        )),
+        "}",
+      ),
     list: ($) => seq("[", commaSep($._expression), "]"),
-    literal_list: $ => seq(':|', repeat($.word), '|'),
-    named_parameter: ($) => seq(
-      $.function_parameter,
-      repeat('\n'),
-      "=",
-      repeat('\n'),
-      $._expression,
-    ),
-    _postfix: $ => prec.left(PREC.POSTFIX, seq(
-      $._expression,
-      repeat1(choice(
-        $._variable_access,
-        $.method_call,
-      ))
-    )),
-    _primary: $ => prec.right(20, choice(
-      $.number,
-      $.boolean,
-      $.string,
-      $.list,
-      $.dict,
-      $.eggex,
-      $.escaped_newline_value,
-      $.literal_list,
-      $.variable_name,
-      $.escaped_double_quote,
-      $.escaped_single_quote,
-    )),
+    literal_list: ($) => seq(":|", repeat($.word), "|"),
+    named_parameter: ($) =>
+      seq(
+        $.function_parameter,
+        repeat("\n"),
+        "=",
+        repeat("\n"),
+        $._expression,
+      ),
+    _postfix: ($) =>
+      prec.left(
+        PREC.POSTFIX,
+        seq(
+          $._expression,
+          repeat1(choice(
+            $._variable_access,
+            $.method_call,
+          )),
+        ),
+      ),
+    _primary: ($) =>
+      prec.right(
+        20,
+        choice(
+          $.number,
+          $.boolean,
+          $.string,
+          $.list,
+          $.dict,
+          $.eggex,
+          $.escaped_newline_value,
+          $.literal_list,
+          $.variable_name,
+          $.escaped_double_quote,
+          $.escaped_single_quote,
+        ),
+      ),
     _literal: ($) => choice($.number, $.boolean, $.string, $.expansion),
-    string: $ => choice(
+    string: ($) =>
+      choice(
         $._double_quotes_string,
         $._single_quotes_string,
         $._raw_string,
         $._j8_string,
         $._byte_string,
-    ),
-    method_call: $ => seq(
-      choice('.', '->'),
-      field('method', $.function_name),
-      '(', commaSep($._expression), ')'),
-    expansion: $ => choice(
-      seq(
-        '$',
-        field("variable", /[0-9\?\#\*]/),
       ),
+    method_call: ($) =>
       seq(
-        '$',
-        field("variable", $.variable_name),
+        choice(".", "->"),
+        field("method", $.function_name),
+        "(",
+        commaSep($._expression),
+        ")",
       ),
-      seq(
-        '${',
-        field("variable", $.variable_name),
-        optional(seq(':-', $._literal)),
-        '}'
-      ),
-      seq(
-        '@',
-        $.variable_name
-      ),
-      seq(
-        choice('$', '@', '^'),
-        '[',
-        $._expression,
-        ']'
-      ),
-      seq(
-        choice('$', '@', '^'),
-        '(',
+    expansion: ($) =>
+      choice(
+        seq(
+          "$",
+          field("variable", /[0-9\?\#\*]/),
+        ),
+        seq(
+          "$",
+          field("variable", $.variable_name),
+        ),
+        seq(
+          "${",
+          field("variable", $.variable_name),
+          optional(seq(":-", $._literal)),
+          "}",
+        ),
+        seq(
+          "@",
+          $.variable_name,
+        ),
+        seq(
+          choice("$", "@", "^"),
+          "[",
+          $._expression,
+          "]",
+        ),
+        seq(
+          choice("$", "@", "^"),
+          "(",
           $.command_call,
-        ')'
+          ")",
+        ),
       ),
-    ),
     binary_expression: ($) => {
       const table = [
         ["or", PREC.LOGICAL_OR],
@@ -392,114 +471,126 @@ module.exports = grammar({
         );
       }));
     },
-    unary_expression: $ => seq(
-      'not',
-      $._expression
-    ),
-    _double_quotes_string: ($) => seq(optional('$'), choice(
+    unary_expression: ($) =>
       seq(
-        '"',
-        repeat($._double_quotes_string_content),
-        '"',
+        "not",
+        $._expression,
       ),
+    _double_quotes_string: ($) =>
       seq(
-        '"""',
-        repeat($._double_quotes_string_content),
-        '"""'
-      )
-    )),
-    _double_quotes_string_content: $ => choice(
-      /[^\$\\"]+/,
-      $.escape_special_characters,
-      $.escaped_double_quote,
-      $.escaped_newline,
-      $.expansion
-    ),
-    _j8_string: $ => choice(
-      seq(
-        "u'",
-        repeat(choice(
-          /[^\\']+/,
-          $.escape_sequence,
-        )),
-        "'",
+        optional("$"),
+        choice(
+          seq(
+            '"',
+            repeat($._double_quotes_string_content),
+            '"',
+          ),
+          seq(
+            '"""',
+            repeat($._double_quotes_string_content),
+            '"""',
+          ),
+        ),
       ),
-      seq(
-        "u'''",
-        repeat(choice(
-          /[^\\']+/,
-          $.escape_sequence,
+    _double_quotes_string_content: ($) =>
+      choice(
+        /[^\$\\"]+/,
+        $.escape_special_characters,
+        $.escaped_double_quote,
+        $.escaped_newline,
+        $.expansion,
+      ),
+    _j8_string: ($) =>
+      choice(
+        seq(
+          "u'",
+          repeat(choice(
+            /[^\\']+/,
+            $.escape_sequence,
+          )),
           "'",
-        )),
-        "'''",
+        ),
+        seq(
+          "u'''",
+          repeat(choice(
+            /[^\\']+/,
+            $.escape_sequence,
+            "'",
+          )),
+          "'''",
+        ),
       ),
-    ),
-    _byte_string: $ => choice(
-      seq(
-        "b'",
-        repeat(choice(
-          /[^\\']+/,
-          $.escape_sequence,
-          $.escaped_bytes,
-        )),
-        "'",
-      ),
-      seq(
-        "b'''",
-        repeat(choice(
-          /[^\\']+/,
-          $.escape_sequence,
-          $.escaped_bytes,
+    _byte_string: ($) =>
+      choice(
+        seq(
+          "b'",
+          repeat(choice(
+            /[^\\']+/,
+            $.escape_sequence,
+            $.escaped_bytes,
+          )),
           "'",
-        )),
-        "'''",
+        ),
+        seq(
+          "b'''",
+          repeat(choice(
+            /[^\\']+/,
+            $.escape_sequence,
+            $.escaped_bytes,
+            "'",
+          )),
+          "'''",
+        ),
       ),
-    ),
     _single_quotes_string: (_) => choice(/'[^'\\]*'/, /'''[^'\\]*'''/),
     _raw_string: (_) => choice(/r'[^']*'/, /r'''[^']*'''/),
-    escaped_double_quote: $ => '\\"',
-    escaped_single_quote: $ => '\\\'',
-    escaped_newline: $ => '\\\n',
-    escaped_newline_value: $ => '\\n',
-    escape_special_characters: _ => token.immediate(seq('\\', choice( '\\', '$'))),
+    escaped_double_quote: (_) => '\\"',
+    escaped_single_quote: (_) => "\\'",
+    escaped_newline: (_) => "\\\n",
+    escaped_newline_value: (_) => "\\n",
+    escape_special_characters: (_) =>
+      token.immediate(seq("\\", choice("\\", "$"))),
     function_name: ($) => $.variable_name,
     function_parameter: ($) => $.variable_name,
     constant: ($) => $.variable_name,
-    glob: $ => seq($.word, repeat(seq('|', $.word))),
-    eggex: $ => seq('/', /[^/]*/, '/'),
-    variable_name: _ => /[_a-zA-Z]\w*/,
-    command_name: $ => /[a-zA-Z0-9_][a-zA-Z0-9\.-_]*/,
-    positional_argument: ($) => /[1-9][0-9]?/,
-    number: ($) => choice(
-      // Dec
-      /\d+(?:(:?_\d+)*)?/,
-      // Hex
-      /0x[a-fA-F0-9]+(?:(?:_[a-fA-F0-9]+)*)?/,
-      // Oct
-      /0o[0-7]+(?:(?:_[0-7]+)*)?/,
-      // Binary
-      /0b[01]+(?:(?:_[01]+)*)?/,
-    ),
-    escaped_bytes: $ => /\\y[a-fA-F0-9]{2}/,
-    escape_sequence: ($) => choice(
-      /\\[\"\'\\\/bfnrt]/,
-      /\\u\{[0-9a-fA-F]{2,5}\}/,
-    ),
-    null: ($) => "null",
-    boolean: ($) => choice("true", "false"),
-    range_operator: ($) => "..<",
-    comment: (_) => token(prec(-10, /#.*/)),
-    word: (_) => token(seq(
+    glob: ($) => seq($.word, repeat(seq("|", $.word))),
+    eggex: (_) => seq("/", /[^/]*/, "/"),
+    variable_name: (_) => /[_a-zA-Z]\w*/,
+    command_name: (_) => /[a-zA-Z0-9_][a-zA-Z0-9\.-_]*/,
+    positional_argument: (_) => /[1-9][0-9]?/,
+    number: (_) =>
       choice(
-        noneOf("#", ...SPECIAL_CHARACTERS),
-        seq("\\", noneOf("\\s")),
+        // Dec
+        /\d+(?:(:?_\d+)*)?/,
+        // Hex
+        /0x[a-fA-F0-9]+(?:(?:_[a-fA-F0-9]+)*)?/,
+        // Oct
+        /0o[0-7]+(?:(?:_[0-7]+)*)?/,
+        // Binary
+        /0b[01]+(?:(?:_[01]+)*)?/,
       ),
-      repeat(choice(
-        noneOf(...SPECIAL_CHARACTERS),
-        seq("\\", noneOf("\\s")),
-        "\\ ",
+    escaped_bytes: (_) => /\\y[a-fA-F0-9]{2}/,
+    escape_sequence: (_) =>
+      choice(
+        /\\[\"\'\\\/bfnrt]/,
+        /\\u\{[0-9a-fA-F]{2,5}\}/,
+      ),
+    null: (_) => "null",
+    boolean: (_) => choice("true", "false"),
+    range_operator: (_) => "..<",
+    comment: (_) => token(prec(-10, /#.*/)),
+    word: (_) =>
+      token(seq(
+        choice(
+          noneOf("#", ...SPECIAL_CHARACTERS),
+          seq("\\", noneOf("\\s")),
+        ),
+        repeat(choice(
+          noneOf(...SPECIAL_CHARACTERS),
+          seq("\\", noneOf("\\s")),
+          "\\ ",
+        )),
       )),
-    )),
     _terminator: (_) => choice(";", ";;", "&"),
   },
 });
@@ -537,7 +628,12 @@ function commaSep(rule) {
  * @returns {SeqRule}
  */
 function commaSep1(rule) {
-  return seq(repeat('\n'), rule, repeat(seq(repeat('\n'), ",", repeat('\n'), rule)), repeat('\n'));
+  return seq(
+    repeat("\n"),
+    rule,
+    repeat(seq(repeat("\n"), ",", repeat("\n"), rule)),
+    repeat("\n"),
+  );
 }
 
 /**
@@ -553,7 +649,14 @@ function tokenLiterals(precedence, ...literals) {
   return choice(...literals.map((l) => token(prec(precedence, l))));
 }
 
+/**
+ * @param {RuleOrLiteral} rule
+ *
+ * @returns {ChoiceRule}
+ */
 function rest_of_arguments(self, rule) {
-  return choice(seq(commaSep1(rule), optional(seq(',', self.rest_of_arguments))),
-      optional(self.rest_of_arguments));
+  return choice(
+    seq(commaSep1(rule), optional(seq(",", self.rest_of_arguments))),
+    optional(self.rest_of_arguments),
+  );
 }
