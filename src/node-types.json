@@ -1402,21 +1402,11 @@
             "named": true
           }
         ]
-      },
-      "variable": {
-        "multiple": false,
-        "required": false,
-        "types": [
-          {
-            "type": "variable_name",
-            "named": true
-          }
-        ]
       }
     },
     "children": {
       "multiple": true,
-      "required": false,
+      "required": true,
       "types": [
         {
           "type": "binary_expression",
@@ -4295,10 +4285,6 @@
   },
   {
     "type": "$",
-    "named": false
-  },
-  {
-    "type": "${",
     "named": false
   },
   {

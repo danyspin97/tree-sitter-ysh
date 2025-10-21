@@ -63,8 +63,11 @@ module.exports = grammar({
     $.comment,
   ],
   externals: ($) => [
-    $.environment_variable_name, // enum 0
-    $.environment_equals, // enum 1
+    $.dollar_expansion,
+    $.hat_expansion,
+    $.environment_variable_name,
+    $.environment_equals,
+    $.error_sentinel,
   ],
   supertypes: ($) => [
     $._statement,
@@ -431,31 +434,36 @@ module.exports = grammar({
     expansion: ($) =>
       choice(
         seq(
-          "$",
-          field("variable", /[0-9\?\#\*]/),
+          alias($.dollar_expansion, "$"),
+          choice($.variable_name, alias(/[0-9\*\?\#\@]/, $.variable_name)),
         ),
         seq(
-          "$",
-          field("variable", $.variable_name),
-        ),
-        seq(
-          "${",
-          field("variable", $.variable_name),
+          alias($.dollar_expansion, "$"),
+          "{",
+          choice($.variable_name, alias(/[0-9\*\?\#\@]/, $.variable_name)),
           optional(seq(":-", $._literal)),
           "}",
         ),
         seq(
-          "@",
+          alias($.hat_expansion, "@"),
           $.variable_name,
         ),
         seq(
-          choice("$", "@", "^"),
+          choice(
+            alias($.dollar_expansion, "$"),
+            alias($.hat_expansion, "@"),
+            "^",
+          ),
           "[",
           $._expression,
           "]",
         ),
         seq(
-          choice("$", "@", "^"),
+          choice(
+            alias($.dollar_expansion, "$"),
+            alias($.hat_expansion, "@"),
+            "^",
+          ),
           "(",
           $.command_call,
           ")",

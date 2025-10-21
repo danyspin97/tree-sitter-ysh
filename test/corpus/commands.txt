@@ -49,6 +49,20 @@ call myplace->setValue(42)
       (function_name
         (variable_name))
       (number))))
+=========
+Expansion
+=========
+echo $? $* $#
+---
+(program
+  (command_call
+    (command_name)
+    (expansion
+      (variable_name))
+    (expansion
+      (variable_name))
+    (expansion
+      (variable_name))))
 =======================================
 Expansion in command with default value
 =======================================
@@ -60,6 +74,12 @@ echo ${not_defined:-'default'}
     (expansion
       (variable_name)
       (string))))
+=======================================
+Invalid expansion
+:error
+=======================================
+echo $ myvar
+---
 =======================================
 Command call with positional, typed arg
 =======================================
@@ -95,7 +115,6 @@ write @foods
     (command_name)
     (expansion
       (variable_name))))
-
 =====
 Pipes
 =====
@@ -118,7 +137,7 @@ cat myfile.csv | cut -d" " -f2 | sort | uniq
     (command_call
       (command_name))))
 ========================
-PREFIX environment value
+Prefix environment value
 ========================
 PYTHONPATH=vendor python3
 MYENV= echo noop

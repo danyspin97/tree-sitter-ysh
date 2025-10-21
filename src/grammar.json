@@ -2751,16 +2751,31 @@
           "type": "SEQ",
           "members": [
             {
-              "type": "STRING",
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "dollar_expansion"
+              },
+              "named": false,
               "value": "$"
             },
             {
-              "type": "FIELD",
-              "name": "variable",
-              "content": {
-                "type": "PATTERN",
-                "value": "[0-9\\?\\#\\*]"
-              }
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "variable_name"
+                },
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "PATTERN",
+                    "value": "[0-9\\*\\?\\#\\@]"
+                  },
+                  "named": true,
+                  "value": "variable_name"
+                }
+              ]
             }
           ]
         },
@@ -2768,33 +2783,35 @@
           "type": "SEQ",
           "members": [
             {
-              "type": "STRING",
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "dollar_expansion"
+              },
+              "named": false,
               "value": "$"
             },
             {
-              "type": "FIELD",
-              "name": "variable",
-              "content": {
-                "type": "SYMBOL",
-                "name": "variable_name"
-              }
-            }
-          ]
-        },
-        {
-          "type": "SEQ",
-          "members": [
-            {
               "type": "STRING",
-              "value": "${"
+              "value": "{"
             },
             {
-              "type": "FIELD",
-              "name": "variable",
-              "content": {
-                "type": "SYMBOL",
-                "name": "variable_name"
-              }
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "variable_name"
+                },
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "PATTERN",
+                    "value": "[0-9\\*\\?\\#\\@]"
+                  },
+                  "named": true,
+                  "value": "variable_name"
+                }
+              ]
             },
             {
               "type": "CHOICE",
@@ -2827,7 +2844,12 @@
           "type": "SEQ",
           "members": [
             {
-              "type": "STRING",
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "hat_expansion"
+              },
+              "named": false,
               "value": "@"
             },
             {
@@ -2843,11 +2865,21 @@
               "type": "CHOICE",
               "members": [
                 {
-                  "type": "STRING",
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "dollar_expansion"
+                  },
+                  "named": false,
                   "value": "$"
                 },
                 {
-                  "type": "STRING",
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "hat_expansion"
+                  },
+                  "named": false,
                   "value": "@"
                 },
                 {
@@ -2877,11 +2909,21 @@
               "type": "CHOICE",
               "members": [
                 {
-                  "type": "STRING",
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "dollar_expansion"
+                  },
+                  "named": false,
                   "value": "$"
                 },
                 {
-                  "type": "STRING",
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "hat_expansion"
+                  },
+                  "named": false,
                   "value": "@"
                 },
                 {
@@ -4045,11 +4087,23 @@
   "externals": [
     {
       "type": "SYMBOL",
+      "name": "dollar_expansion"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "hat_expansion"
+    },
+    {
+      "type": "SYMBOL",
       "name": "environment_variable_name"
     },
     {
       "type": "SYMBOL",
       "name": "environment_equals"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "error_sentinel"
     }
   ],
   "inline": [
