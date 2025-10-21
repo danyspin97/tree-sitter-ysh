@@ -37,6 +37,23 @@ Multiline commands
   | head -n 30              # limit to 30 files
   ;
 ---
+(program
+  (multiline_command_call
+    (command_name)
+    (word)
+    (comment)
+    (word)
+    (word)
+    (word)
+    (word)
+    (comment)
+    (command_name)
+    (word)
+    (comment)
+    (command_name)
+    (word)
+    (number)
+    (comment)))
 ============
 Call builtin
 ============
@@ -121,9 +138,9 @@ Pipes
 cat myfile.csv | cut -d" " -f2 | sort | uniq
 ---
 (program
-  (piped_statement
-    (piped_statement
-      (piped_statement
+  (chain_statement
+    (chain_statement
+      (chain_statement
         (command_call
           (command_name)
           (word))

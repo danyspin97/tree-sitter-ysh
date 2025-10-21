@@ -96,10 +96,14 @@ module.exports = grammar({
       ),
     _statement: ($) =>
       choice(
+        $.multiline_command_call,
+        $._single_line_statement,
+      ),
+    _single_line_statement: ($) =>
+      choice(
         $.variable_declaration,
         $.variable_assignment,
         $.constant_declaration,
-        // $.multiline_command_call,
         $.expression_mode,
         $.command_call,
         $.function_definition,
@@ -108,7 +112,7 @@ module.exports = grammar({
         $.while_statement,
         $.if_statement,
         $.case_statement,
-        $.piped_statement,
+        $.chain_statement,
       ),
     _expression: ($) =>
       choice(
@@ -120,7 +124,15 @@ module.exports = grammar({
         $.null,
         $._paren_expression,
       ),
-    piped_statement: ($) => prec.left(seq($._statement, "|", $._statement)),
+    chain_statement: ($) =>
+      prec.left(
+        -2,
+        seq(
+          $._single_line_statement,
+          choice("|", "&&", "||"),
+          $._single_line_statement,
+        ),
+      ),
     function_definition: ($) =>
       seq("func", $.function_name, $.parameter_list, $.func_block),
     proc_definition: ($) =>
@@ -254,13 +266,19 @@ module.exports = grammar({
         optional(seq($.block, repeat($.redirection))),
       )),
     multiline_command_call: ($) =>
-      seq(
+      prec.left(seq(
         "...",
         $.command_name,
-        repeat(seq(choice($.command_line, $.comment), "\n")),
-        optional($.command_line),
-      ),
-    command_line: ($) => seq(repeat1(choice($._literal, $.word))),
+        repeat(
+          choice(
+            prec.left(20, seq(choice("|", "&&", "||"), $.command_name)),
+            seq(choice($._command_line, $.comment), "\n"),
+          ),
+        ),
+        optional($._command_line),
+      )),
+    _command_line: ($) =>
+      seq(repeat1(field("argument", choice($._literal, $.word)))),
     dollar_token: (_) => "$",
     for_statement: ($) =>
       seq(

@@ -75,6 +75,9 @@
   "=>"
   "."
   "->"
+  "..."
+  "&&"
+  "||"
   (range_operator)
 ] @operator
 
@@ -92,6 +95,7 @@ variable: (variable_name) @variable
 (variable_assignment key: (variable_name) @property)
 
 (command_call (word) @variable.parameter)
+(multiline_command_call argument: (word) @variable.parameter)
 
 ; (dollar_token) @punctuation.special
 
