@@ -11,7 +11,8 @@ for item in (foods) {
     (variable_name)
     (block
       (command_call
-        (command_name)
+        (command_name
+          (word))
         (expansion
           (variable_name))))))
 
@@ -29,7 +30,8 @@ for i, item in (foods) {
     (variable_name)
     (block
       (command_call
-        (command_name)
+        (command_name
+          (word))
         (expansion
           (variable_name))))))
 
@@ -48,7 +50,8 @@ for i, word in README.md *.py {
     (word)
     (block
       (command_call
-        (command_name)
+        (command_name
+          (word))
         (expansion
           (variable_name))))))
 
@@ -68,7 +71,8 @@ for i in (3 ..< 5) {  # range operator ..<
     (block
       (comment)
       (command_call
-        (command_name)
+        (command_name
+          (word))
         (expansion
           (variable_name))))))
 
@@ -96,12 +100,14 @@ while (i < 6) {
 (program
   (while_statement
     (command_call
-      (command_name)
+      (command_name
+        (word))
       (word)
       (word))
     (block
       (command_call
-        (command_name)
+        (command_name
+          (word))
         (number))))
   (variable_declaration
     (variable_name)
@@ -112,7 +118,8 @@ while (i < 6) {
       (number))
     (block
       (command_call
-        (command_name)
+        (command_name
+          (word))
         (string
           (expansion
             (variable_name))))
@@ -147,38 +154,46 @@ if (not done) {        # negate with 'not' operator (contrast with !)
 (program
   (if_statement
     (command_call
-      (command_name)
+      (command_name
+        (word))
       (word)
       (word))
     (block
       (command_call
-        (command_name)
+        (command_name
+          (word))
         (string))
       (command_call
-        (command_name)
+        (command_name
+          (word))
         (word)
         (word))
       (comment))
     (command_call
-      (command_name)
+      (command_name
+        (word))
       (word)
       (word))
     (block
       (command_call
-        (command_name)
+        (command_name
+          (word))
         (string)))
     (block
       (command_call
-        (command_name)
+        (command_name
+          (word))
         (string))))
   (if_statement
     (command_call
-      (command_name)
+      (command_name
+        (word))
       (word)
       (word))
     (block
       (command_call
-        (command_name)
+        (command_name
+          (word))
         (string))))
   (if_statement
     (binary_expression
@@ -186,7 +201,8 @@ if (not done) {        # negate with 'not' operator (contrast with !)
       (number))
     (block
       (command_call
-        (command_name)
+        (command_name
+          (word))
         (string))))
   (variable_declaration
     (variable_name)
@@ -197,7 +213,8 @@ if (not done) {        # negate with 'not' operator (contrast with !)
     (block
       (comment)
       (command_call
-        (command_name)
+        (command_name
+          (word))
         (string)))))
 ============
 Inline block
@@ -206,11 +223,13 @@ cd /tmp { echo $PWD }
 ---
 (program
   (command_call
-    (command_name)
+    (command_name
+      (word))
     (word)
     (block
       (command_call
-        (command_name)
+        (command_name
+          (word))
         (expansion
           (variable_name))))))
 ==============
@@ -240,7 +259,8 @@ case (s) {
         (word))
       (block
         (command_call
-          (command_name)
+          (command_name
+            (word))
           (string))))
     (case_condition
       (glob
@@ -248,14 +268,16 @@ case (s) {
         (word))
       (block
         (command_call
-          (command_name)
+          (command_name
+            (word))
           (string))))
     (case_condition
       (glob
         (word))
       (block
         (command_call
-          (command_name)
+          (command_name
+            (word))
           (string)))))
   (case_statement
     (variable_name)
@@ -263,7 +285,8 @@ case (s) {
       (eggex)
       (block
         (command_call
-          (command_name)
+          (command_name
+            (word))
           (string))))
     (case_condition
       (binary_expression
@@ -271,10 +294,12 @@ case (s) {
         (number))
           (block
             (command_call
-              (command_name)
+              (command_name
+                (word))
               (string))))
         (case_condition
           (block
             (command_call
-              (command_name)
+              (command_name
+                (word))
               (string))))))

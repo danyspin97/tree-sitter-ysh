@@ -5,7 +5,8 @@ cat
 ---
 (program
   (command_call
-    (command_name)))
+    (command_name
+      (word))))
 
 ==============================
 Command with literal arguments
@@ -14,7 +15,8 @@ echo "foo" bar 12
 ---
 (program
   (command_call
-    (command_name)
+    (command_name
+      (word))
     (string)
     (word)
     (number)))
@@ -26,7 +28,8 @@ echo not#comment
 ---
 (program
  (command_call
-  (command_name)
+  (command_name
+    (word))
   (word)))
 ==================
 Multiline commands
@@ -39,7 +42,8 @@ Multiline commands
 ---
 (program
   (multiline_command_call
-    (command_name)
+    (command_name
+      (word))
     (word)
     (comment)
     (word)
@@ -47,10 +51,12 @@ Multiline commands
     (word)
     (word)
     (comment)
-    (command_name)
+    (command_name
+      (word))
     (word)
     (comment)
-    (command_name)
+    (command_name
+      (word))
     (word)
     (number)
     (comment)))
@@ -73,7 +79,8 @@ echo $? $* $#
 ---
 (program
   (command_call
-    (command_name)
+    (command_name
+      (word))
     (expansion
       (variable_name))
     (expansion
@@ -87,7 +94,8 @@ echo ${not_defined:-'default'}
 ---
 (program
   (command_call
-    (command_name)
+    (command_name
+      (word))
     (expansion
       (variable_name)
       (string))))
@@ -104,7 +112,8 @@ pp value ([1, 2])
 ---
 (program
   (command_call
-    (command_name)
+    (command_name
+      (word))
     (word)
     (parameter_list_call
       (list
@@ -117,7 +126,8 @@ json read (&mydict)
 ---
 (program
   (command_call
-    (command_name)
+    (command_name
+      (word))
     (word)
     (parameter_list_call
       (unary_expression
@@ -129,7 +139,8 @@ write @foods
 ---
 (program
   (command_call
-    (command_name)
+    (command_name
+      (word))
     (expansion
       (variable_name))))
 =====
@@ -142,17 +153,21 @@ cat myfile.csv | cut -d" " -f2 | sort | uniq
     (chain_statement
       (chain_statement
         (command_call
-          (command_name)
+          (command_name
+            (word))
           (word))
         (command_call
-          (command_name)
+          (command_name
+            (word))
           (word)
           (string)
           (word)))
       (command_call
-        (command_name)))
+        (command_name
+          (word))))
     (command_call
-      (command_name))))
+      (command_name
+        (word)))))
 ========================
 Prefix environment value
 ========================
@@ -165,11 +180,13 @@ PATH="$PATH:/usr/local/bin" mycmd
     (environment
       (variable_name)
       (word))
-    (command_name))
+    (command_name
+      (word)))
   (command_call
     (environment
       (variable_name))
-    (command_name)
+    (command_name
+      (word))
     (word))
   (command_call
     (environment
@@ -177,7 +194,8 @@ PATH="$PATH:/usr/local/bin" mycmd
       (string
         (expansion
           (variable_name))))
-    (command_name)))
+    (command_name
+      (word))))
 ===========
 Redirection
 ===========
@@ -191,32 +209,38 @@ json read (&mydict) < foo.json
 ---
 (program
   (command_call
-    (command_name)
+    (command_name
+      (word))
     (word)
     (redirection
       (word)))
   (command_call
-    (command_name)
+    (command_name
+      (word))
     (redirection
       (number)
       (word)))
   (command_call
-    (command_name)
+    (command_name
+      (word))
     (redirection
       (word)))
   (command_call
-    (command_name)
+    (command_name
+      (word))
     (word)
     (redirection
       (number)
       (word)))
   (command_call
-    (command_name)
+    (command_name
+      (word))
     (string)
     (redirection
       (number)))
   (command_call
-    (command_name)
+    (command_name
+      (word))
     (word)
     (redirection
       (word))
@@ -225,10 +249,80 @@ json read (&mydict) < foo.json
         (variable_name)
         (number))))
   (command_call
-    (command_name)
+    (command_name
+      (word))
     (word)
     (parameter_list_call
       (unary_expression
         (variable_name)))
     (redirection
       (word))))
+====================
+Expansion as command
+====================
+@ARGV
+---
+(program
+  (command_call
+    (command_name
+      (expansion
+        (variable_name)))))
+======================================
+Command arguments with trailing commas
+======================================
+json write (space=0, { status: 302, headers: { location: '/', }, },)
+---
+(program
+  (command_call
+    (command_name
+      (word))
+    (word)
+    (parameter_list_call
+      (named_parameter
+        (function_parameter
+          (variable_name))
+        (number))
+      (dict
+        (variable_name)
+        (number)
+        (variable_name)
+        (dict
+          (variable_name)
+          (string))))))
+===========================
+Multiline command arguments
+===========================
+json write (space=0, {
+    status: 302,
+    headers: {
+        location: '/',
+    },
+},)
+---
+(program
+  (command_call
+    (command_name
+      (word))
+    (word)
+    (parameter_list_call
+      (named_parameter
+        (function_parameter
+          (variable_name))
+        (number))
+      (dict
+        (variable_name)
+        (number)
+        (variable_name)
+        (dict
+          (variable_name)
+          (string))))))
+============
+Execute file
+============
+./run.ysh build
+---
+(program
+  (command_call
+    (command_name
+      (word))
+    (word)))

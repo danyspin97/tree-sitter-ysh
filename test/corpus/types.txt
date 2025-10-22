@@ -58,13 +58,15 @@ echo "hi $person, $(echo bye)"  # => hi alice, bye
     (variable_name)
     (string))
   (command_call
-    (command_name)
+    (command_name
+      (word))
     (string
       (expansion
         (variable_name))
       (expansion
         (command_call
-          (command_name)
+          (command_name
+            (word))
           (word)))))
   (comment))
 ======================
@@ -78,7 +80,8 @@ echo $"Number is $x"
     (variable_name)
     (string))
   (command_call
-    (command_name)
+    (command_name
+      (word))
     (string
       (expansion
         (variable_name)))))
@@ -89,7 +92,8 @@ echo "\$ \" \\ "
 ---
 (program
   (command_call
-    (command_name)
+    (command_name
+      (word))
     (string
       (escape_special_characters)
       (escaped_double_quote)
@@ -125,7 +129,8 @@ echo u' A is \u{41} \n line two, with backslash \\'
 ---
 (program
   (command_call
-    (command_name)
+    (command_name
+      (word))
     (string
       (escape_sequence)
       (escape_sequence)
@@ -137,7 +142,8 @@ echo b'byte \yff'
 ---
 (program
   (command_call
-    (command_name)
+    (command_name
+      (word))
     (string
       (escaped_bytes))))
 =================
@@ -157,7 +163,8 @@ expression sub: $[x + 3]
     (variable_name))
   (expansion
     (command_call
-      (command_name)
+      (command_name
+        (word))
       (word)))
   (expansion
     (binary_expression
@@ -191,7 +198,8 @@ echo "hi $[d["key"]]"
 ---
 (program
   (command_call
-    (command_name)
+    (command_name
+      (word))
     (string
       (expansion
         (variable_name)
@@ -244,7 +252,8 @@ echo $[d2.alice_z]   # => ZZZ
       (string)))
   (comment)
   (command_call
-    (command_name)
+    (command_name
+      (word))
     (expansion
       (variable_name)
       (variable_name)))
@@ -282,7 +291,8 @@ if (z !~ / '.255' %end /) {
     (block
       (comment)
       (command_call
-        (command_name)
+        (command_name
+          (word))
         (string
           (expansion
             (variable_name))))))
@@ -293,6 +303,37 @@ if (z !~ / '.255' %end /) {
       (eggex))
     (block
       (command_call
-        (command_name)
+        (command_name
+          (word))
         (string))))
   (comment))
+========================
+List with trailing comma
+========================
+var l = [1, 2, 3
+, ]
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (list
+      (number)
+      (number)
+      (number))))
+===========================
+List with 2 trailing commas
+:error
+===========================
+var l = [1, 2, 3, ,]
+---
+=======================
+Dict with string as key
+=======================
+var l = { 'mykey': 'foo' }
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (dict
+      (string)
+      (string))))

@@ -57,10 +57,11 @@ module.exports = grammar({
     $._terminator,
   ],
   extras: ($) => [
-    / /,
+    /( |\t)+/,
     /\\\r?\n/,
     /\\( |\t|\v|\f)/,
     $.comment,
+    $.escaped_newline,
   ],
   externals: ($) => [
     $.dollar_expansion,
@@ -87,15 +88,27 @@ module.exports = grammar({
       "case",
     ],
   },
+  conflicts: ($) => [[$.parameter_list_call], [$._statements]],
   rules: {
     program: ($) => optional($._statements),
     _statements: ($) =>
       choice(
         seq(
-          repeat(choice(seq($._statement, choice($._terminator, /\n/)), /\n/)),
-          $._statement,
+          repeat(
+            choice(
+              seq($._single_line_statement, choice($._terminator, /\n/)),
+              seq($.multiline_command_call),
+              /\n/,
+            ),
+          ),
+          choice($._statement, $.multiline_command_call),
         ),
-        repeat1(choice(seq($._statement, choice($._terminator, /\n/)), /\n/)),
+        repeat1(
+          choice(
+            seq($._single_line_statement, choice($._terminator, /\n/)),
+            /\n/,
+          ),
+        ),
       ),
     _statement: ($) =>
       choice(
@@ -124,8 +137,8 @@ module.exports = grammar({
         $._postfix,
         $.unary_expression,
         $.binary_expression,
-        $.null,
         $._paren_expression,
+        $.expansion,
       ),
     chain_statement: ($) =>
       prec.left(
@@ -139,7 +152,12 @@ module.exports = grammar({
     function_definition: ($) =>
       seq("func", $.function_name, $.parameter_list, $.func_block),
     proc_definition: ($) =>
-      seq("proc", $.function_name, $.proc_parameter_list, $.proc_block),
+      seq(
+        "proc",
+        $.proc_name,
+        optional($.proc_parameter_list),
+        $.proc_block,
+      ),
     rest_of_arguments: ($) => seq("...", $.variable_name),
     parameter_list: ($) =>
       seq(
@@ -171,11 +189,15 @@ module.exports = grammar({
     parameter_list_call: ($) =>
       seq(
         "(",
-        rest_of_arguments($, $._expression),
-        optional(seq(
-          ";",
-          rest_of_arguments($, $.named_parameter),
-        )),
+        choice(
+          seq(
+            rest_of_arguments($, $._expression),
+            ";",
+            rest_of_arguments($, $.named_parameter),
+          ),
+          rest_of_arguments($, choice($.named_parameter, $._expression)),
+        ),
+        optional(","),
         ")",
       ),
     block: ($) =>
@@ -243,7 +265,7 @@ module.exports = grammar({
         choice("setvar", "setglobal"),
         field("variable", $.variable_name),
         optional($._variable_access),
-        choice("=", "+="),
+        choice("=", "+=", "-=", "*=", "/="),
         field("value", $._expression),
       ),
     constant_declaration: ($) =>
@@ -269,7 +291,7 @@ module.exports = grammar({
         optional(seq($.block, repeat($.redirection))),
       )),
     multiline_command_call: ($) =>
-      prec.left(seq(
+      prec.right(seq(
         "...",
         $.command_name,
         repeat(
@@ -278,10 +300,10 @@ module.exports = grammar({
             seq(choice($._command_line, $.comment), "\n"),
           ),
         ),
-        optional($._command_line),
+        optional(choice($._command_line, "\n", $._terminator)),
       )),
     _command_line: ($) =>
-      seq(repeat1(field("argument", choice($._literal, $.word)))),
+      prec.right(seq(repeat1(field("argument", choice($._literal, $.word))))),
     dollar_token: (_) => "$",
     for_statement: ($) =>
       seq(
@@ -372,24 +394,32 @@ module.exports = grammar({
           field("call", $.function_name),
           "(",
           commaSep($._expression),
-          optional(seq(choice(",", ";"), commaSep($.named_parameter))),
+          optional(
+            choice(
+              seq(choice(",", ";"), commaSepWithTrailing($.named_parameter)),
+              ",",
+            ),
+          ),
           ")",
         ),
       )),
     dict: ($) =>
       seq(
         "{",
-        commaSep(seq(
-          choice(
-            field("key", $.variable_name),
-            seq("[", field("key", $._expression), "]"),
+        commaSepWithTrailing(
+          seq(
+            choice(
+              field("key", $.variable_name),
+              field("key", $.string),
+              seq("[", field("key", $._expression), "]"),
+            ),
+            ":",
+            $._expression,
           ),
-          ":",
-          $._expression,
-        )),
+        ),
         "}",
       ),
-    list: ($) => seq("[", commaSep($._expression), "]"),
+    list: ($) => seq("[", commaSepWithTrailing($._expression), "]"),
     literal_list: ($) => seq(":|", repeat($.word), "|"),
     named_parameter: ($) =>
       seq(
@@ -424,6 +454,7 @@ module.exports = grammar({
         choice(
           $.number,
           $.boolean,
+          $.null,
           $.string,
           $.list,
           $.dict,
@@ -449,7 +480,7 @@ module.exports = grammar({
         choice(".", "->"),
         field("method", $.function_name),
         "(",
-        commaSep($._expression),
+        commaSepWithTrailing($._expression),
         ")",
       ),
     expansion: ($) =>
@@ -565,7 +596,6 @@ module.exports = grammar({
         /[^\$\\"]+/,
         $.escape_special_characters,
         $.escaped_double_quote,
-        $.escaped_newline,
         $.expansion,
       ),
     _j8_string: ($) =>
@@ -619,12 +649,13 @@ module.exports = grammar({
     escape_special_characters: (_) =>
       token.immediate(seq("\\", choice("\\", "$"))),
     function_name: ($) => $.variable_name,
+    proc_name: (_) => token(/[-_a-zA-Z0-9]+/),
     function_parameter: ($) => $.variable_name,
     constant: ($) => $.variable_name,
     glob: ($) => seq($.word, repeat(seq("|", $.word))),
     eggex: (_) => seq("/", /[^/]*/, "/"),
     variable_name: (_) => token(/[_a-zA-Z]\w*/),
-    command_name: (_) => /[a-zA-Z0-9_][a-zA-Z0-9\.-_]*/,
+    command_name: ($) => choice($.word, $._literal),
     positional_argument: (_) => /[1-9][0-9]?/,
     number: ($) =>
       choice(
@@ -650,7 +681,7 @@ module.exports = grammar({
     word: (_) =>
       token(seq(
         choice(
-          noneOf("#", ...SPECIAL_CHARACTERS),
+          noneOf("#", "@", ...SPECIAL_CHARACTERS),
           seq("\\", noneOf("\\s")),
         ),
         repeat(choice(
@@ -685,6 +716,17 @@ function noneOf(...characters) {
  */
 function commaSep(rule) {
   return optional(commaSep1(rule));
+}
+
+/**
+ * Same as `commaSep` but allows a trailing comma
+ *
+ * @param {RuleOrLiteral} rule
+ *
+ * @returns {SeqRule}
+ */
+function commaSepWithTrailing(rule) {
+  return seq(commaSep(rule), optional(seq(",", repeat("\n"))));
 }
 
 /**

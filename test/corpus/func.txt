@@ -80,7 +80,8 @@ func f(...rest_pos) { echo worked }
         (variable_name)))
     (func_block
       (command_call
-        (command_name)
+        (command_name
+          (word))
         (word)))))
 =======================================
 Func call with word and named arguments
@@ -98,3 +99,48 @@ call myRepeat('z', 3, special=true)
         (function_parameter
           (variable_name))
         (boolean)))))
+======================
+Proc definition with -
+======================
+proc -my-func {
+	echo here
+}
+---
+(program
+  (proc_definition
+    (proc_name)
+    (proc_block
+      (command_call
+        (command_name
+          (word))
+        (word)))))
+=======================
+Proc with complex block
+=======================
+proc serve {
+	setup
+	... dist/shttp -port 5432 -- $0
+		'GET /{$} list-todos'
+		'POST /todo add-todo'
+		'DELETE /todo/{id} delete-todo'
+		;
+}
+---
+(program
+  (proc_definition
+    (proc_name)
+    (proc_block
+      (command_call
+        (command_name
+          (word)))
+      (multiline_command_call
+        (command_name
+          (word))
+        (word)
+        (number)
+        (word)
+        (expansion
+          (variable_name))
+        (string)
+        (string)
+        (string)))))

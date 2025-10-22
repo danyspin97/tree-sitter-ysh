@@ -6,6 +6,9 @@ enum TokenType {
   HAT_EXPANSION,
   ENV_VAR_NAME,
   ENV_EQUALS,
+  BLOCK_START,
+  BLOCK_END,
+  NEWLINE,
   ERROR_SENTINEL,
 };
 
@@ -67,9 +70,6 @@ bool tree_sitter_ysh_external_scanner_scan(void *payload, TSLexer *lexer,
         return true;
       }
     }
-    if (!valid_symbols[HAT_EXPANSION]) {
-      return false;
-    }
   }
 
   if (valid_symbols[HAT_EXPANSION]) {
@@ -81,7 +81,6 @@ bool tree_sitter_ysh_external_scanner_scan(void *payload, TSLexer *lexer,
         return true;
       }
     }
-    return false;
   }
 
   if (valid_symbols[ENV_VAR_NAME]) {

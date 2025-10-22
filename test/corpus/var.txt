@@ -16,7 +16,8 @@ v a r x = 1
 ---
 (program
   (command_call
-    (command_name)
+    (command_name
+      (word))
     (word)
     (word)
     (word)
@@ -54,6 +55,7 @@ var x = \
 (program
   (variable_declaration
     (variable_name)
+    (escaped_newline)
     (string)))
 
 ================================
@@ -171,7 +173,8 @@ echo ${not_defined:-'default'}
 ---
 (program
   (command_call
-    (command_name)
+    (command_name
+      (word))
     (expansion
       (variable_name)
       (string))))
@@ -202,3 +205,17 @@ var trimmed = line.trim() => upper()  # 'ALE BEAN'
         (function_name
           (variable_name)))))
   (comment))
+================================
+Const declaration with expansion
+================================
+const YSH = $(command -v ysh)
+---
+(program
+  (constant_declaration
+    (variable_name)
+    (expansion
+      (command_call
+        (command_name
+          (word))
+        (word)
+        (word)))))
