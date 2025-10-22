@@ -282,7 +282,9 @@ case (s) {
   (case_statement
     (variable_name)
     (case_condition
-      (eggex)
+      (eggex
+        (word)
+        (string))
       (block
         (command_call
           (command_name
@@ -292,14 +294,14 @@ case (s) {
       (binary_expression
         (number)
         (number))
-          (block
-            (command_call
-              (command_name
-                (word))
+      (block
+        (command_call
+          (command_name
+            (word))
               (string))))
         (case_condition
           (block
-            (command_call
-              (command_name
-                (word))
-              (string))))))
+        (command_call
+          (command_name
+            (word))
+          (string))))))

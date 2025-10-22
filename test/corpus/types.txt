@@ -9,8 +9,13 @@ var hex = 0x0010_ffff
 var octal = 0o755
 
 var binary = 0b0001_0000
+
+var float = 2.22
 ---
 (program
+  (variable_declaration
+    (variable_name)
+    (number))
   (variable_declaration
     (variable_name)
     (number))
@@ -277,10 +282,22 @@ if (z !~ / '.255' %end /) {
 (program
   (variable_declaration
     (variable_name)
-    (eggex))
+    (eggex
+      (word)
+      (ERROR
+        (variable_name)
+        (variable_name))))
   (variable_declaration
     (variable_name)
-    (eggex))
+    (eggex
+      (word)
+      (string)
+      (word)
+      (string)
+      (word)
+      (string)
+      (word)
+      (string)))
   (variable_declaration
     (variable_name)
     (string))
@@ -300,7 +317,9 @@ if (z !~ / '.255' %end /) {
   (if_statement
     (binary_expression
       (variable_name)
-      (eggex))
+      (eggex
+        (string)
+        (word)))
     (block
       (command_call
         (command_name
@@ -337,3 +356,41 @@ var l = { 'mykey': 'foo' }
     (dict
       (string)
       (string))))
+===============
+Complex strings
+===============
+var conf = """
+    (defwindow bar$display
+      :monitor "$display"
+      :geometry (geometry :x "0%"
+                          :y "1%"
+                          :width "98%"
+                          :anchor "top center")
+      :stacking "fg"
+      :reserve (struts :distance "40px" :side "top")
+      :exclusive true
+      :class "bar"
+        (bar :display_id "$display"))
+"""
+echo "$conf" >> "$conf_file"
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (string
+      (expansion
+        (variable_name))
+      (expansion
+        (variable_name))
+      (expansion
+        (variable_name))))
+  (command_call
+    (command_name
+      (word))
+    (string
+      (expansion
+        (variable_name)))
+    (redirection
+      (string
+        (expansion
+          (variable_name))))))

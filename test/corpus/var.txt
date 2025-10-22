@@ -129,6 +129,21 @@ var myarray = :| ale bean |
     (literal_list
       (word)
       (word))))
+===========================================
+Var declaration with multiline literal list
+===========================================
+var myarray = :| ale 
+                 bea
+                 carl
+               |
+---
+(program
+  (variable_declaration
+    (variable_name)
+    (literal_list
+      (word)
+      (word)
+      (word))))
 ==========================
 Var assignment with setvar
 ==========================

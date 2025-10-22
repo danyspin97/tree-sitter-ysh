@@ -100,11 +100,22 @@ call myRepeat('z', 3, special=true)
           (variable_name))
         (boolean)))))
 ======================
-Proc definition with -
+Proc definitions
 ======================
 proc -my-func {
 	echo here
 }
+proc my_func2 { echo here;
+	echo here
+}
+
+proc myfunc3 { echo here
+	echo here again;
+}
+
+proc inline { echo inline! }
+
+proc inline2 { echo inline again; }
 ---
 (program
   (proc_definition
@@ -113,6 +124,44 @@ proc -my-func {
       (command_call
         (command_name
           (word))
+        (word))))
+  (proc_definition
+    (proc_name)
+    (proc_block
+      (command_call
+        (command_name
+          (word))
+        (word))
+      (command_call
+        (command_name
+          (word))
+        (word))))
+  (proc_definition
+    (proc_name)
+    (proc_block
+      (command_call
+        (command_name
+          (word))
+        (word))
+      (command_call
+        (command_name
+          (word))
+        (word)
+        (word))))
+  (proc_definition
+    (proc_name)
+    (proc_block
+      (command_call
+        (command_name
+          (word))
+        (word))))
+  (proc_definition
+    (proc_name)
+    (proc_block
+      (command_call
+        (command_name
+          (word))
+        (word)
         (word)))))
 =======================
 Proc with complex block

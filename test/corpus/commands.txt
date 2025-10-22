@@ -37,8 +37,14 @@ Multiline commands
 ... find /bin               # traverse this directory and
     -type f -a -executable  # print executable files
   | sort -r                 # reverse sort
+  # inline comment
   | head -n 30              # limit to 30 files
   ;
+
+... echo
+    works!; # with comment
+
+... echo "new command" ;
 ---
 (program
   (multiline_command_call
@@ -55,11 +61,21 @@ Multiline commands
       (word))
     (word)
     (comment)
+    (comment)
     (command_name
       (word))
     (word)
     (number)
-    (comment)))
+    (comment))
+  (multiline_command_call
+    (command_name
+      (word))
+    (word))
+  (comment)
+  (multiline_command_call
+    (command_name
+      (word))
+    (string)))
 ============
 Call builtin
 ============
@@ -149,25 +165,22 @@ Pipes
 cat myfile.csv | cut -d" " -f2 | sort | uniq
 ---
 (program
-  (chain_statement
-    (chain_statement
-      (chain_statement
-        (command_call
-          (command_name
-            (word))
+  (command_call
+    (command_name
+      (word))
+    (word)
+    (command_call
+      (command_name
+        (word))
+      (word)
+      (string)
+      (word)
+      (command_call
+        (command_name
           (word))
         (command_call
           (command_name
-            (word))
-          (word)
-          (string)
-          (word)))
-      (command_call
-        (command_name
-          (word))))
-    (command_call
-      (command_name
-        (word)))))
+            (word)))))))
 ========================
 Prefix environment value
 ========================
@@ -326,3 +339,116 @@ Execute file
     (command_name
       (word))
     (word)))
+===================
+Proc with out param
+===================
+hay define Service
+
+proc set-port (port_num;; out) {
+  call out->setValue("localhost:$port_num")
+}
+
+Service foo {
+  set-port 80 :p1
+  set-port 81 :p2
+}
+---
+(program
+  (command_call
+    (command_name
+      (word))
+    (word)
+    (word))
+  (proc_definition
+    (proc_name)
+    (proc_parameter_list
+      (function_parameter
+        (variable_name))
+      (function_parameter
+        (variable_name)))
+    (proc_block
+      (expression_mode
+        (variable_name)
+        (method_call
+          (function_name
+            (variable_name))
+          (string
+            (expansion
+              (variable_name)))))))
+  (command_call
+    (command_name
+      (word))
+    (word)
+    (block
+      (command_call
+        (command_name
+          (word))
+        (number)
+        (variable_name))
+      (command_call
+        (command_name
+          (word))
+        (number)
+        (variable_name)))))
+============================
+Command chain and statements
+============================
+if test -f $myfile && test -f $myfile2 {
+  rm $myfile $myfile2
+}
+
+true && echo works || if (val) { echo "doesn't work" }
+---
+(program
+  (if_statement
+    (command_call
+      (command_name
+        (word))
+      (word)
+      (expansion
+        (variable_name))
+      (command_call
+        (command_name
+          (word))
+        (word)
+        (expansion
+          (variable_name))))
+    (block
+      (command_call
+        (command_name
+          (word))
+        (expansion
+          (variable_name))
+        (expansion
+          (variable_name)))))
+  (command_call
+    (command_name
+      (word))
+    (command_call
+      (command_name
+        (word))
+      (word)
+      (if_statement
+        (variable_name)
+        (block
+          (command_call
+            (command_name
+              (word))
+            (string)))))))
+========================
+Invalid chain statements
+:error
+========================
+if true {
+  echo works
+} || echo false
+---
+===============
+True as command
+===============
+true
+---
+(program
+  (command_call
+    (command_name
+      (word))))

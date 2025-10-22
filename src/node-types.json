@@ -8,10 +8,6 @@
         "named": true
       },
       {
-        "type": "chain_statement",
-        "named": true
-      },
-      {
         "type": "command_call",
         "named": true
       },
@@ -874,7 +870,7 @@
     }
   },
   {
-    "type": "chain_statement",
+    "type": "command_call",
     "named": true,
     "fields": {},
     "children": {
@@ -882,11 +878,15 @@
       "required": true,
       "types": [
         {
-          "type": "case_statement",
+          "type": "block",
           "named": true
         },
         {
-          "type": "chain_statement",
+          "type": "boolean",
+          "named": true
+        },
+        {
+          "type": "case_statement",
           "named": true
         },
         {
@@ -894,7 +894,19 @@
           "named": true
         },
         {
+          "type": "command_name",
+          "named": true
+        },
+        {
           "type": "constant_declaration",
+          "named": true
+        },
+        {
+          "type": "environment",
+          "named": true
+        },
+        {
+          "type": "expansion",
           "named": true
         },
         {
@@ -914,7 +926,23 @@
           "named": true
         },
         {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "parameter_list_call",
+          "named": true
+        },
+        {
           "type": "proc_definition",
+          "named": true
+        },
+        {
+          "type": "redirection",
+          "named": true
+        },
+        {
+          "type": "string",
           "named": true
         },
         {
@@ -926,54 +954,11 @@
           "named": true
         },
         {
+          "type": "variable_name",
+          "named": true
+        },
+        {
           "type": "while_statement",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "command_call",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "block",
-          "named": true
-        },
-        {
-          "type": "boolean",
-          "named": true
-        },
-        {
-          "type": "command_name",
-          "named": true
-        },
-        {
-          "type": "environment",
-          "named": true
-        },
-        {
-          "type": "expansion",
-          "named": true
-        },
-        {
-          "type": "number",
-          "named": true
-        },
-        {
-          "type": "parameter_list_call",
-          "named": true
-        },
-        {
-          "type": "redirection",
-          "named": true
-        },
-        {
-          "type": "string",
           "named": true
         },
         {
@@ -992,15 +977,7 @@
       "required": true,
       "types": [
         {
-          "type": "boolean",
-          "named": true
-        },
-        {
           "type": "expansion",
-          "named": true
-        },
-        {
-          "type": "number",
           "named": true
         },
         {
@@ -1395,7 +1372,33 @@
   {
     "type": "eggex",
     "named": true,
-    "fields": {}
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "boolean",
+          "named": true
+        },
+        {
+          "type": "expansion",
+          "named": true
+        },
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "string",
+          "named": true
+        },
+        {
+          "type": "word",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "environment",
@@ -3541,7 +3544,7 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "_statement",
