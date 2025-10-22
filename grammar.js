@@ -90,9 +90,12 @@ module.exports = grammar({
   rules: {
     program: ($) => optional($._statements),
     _statements: ($) =>
-      seq(
-        repeat(choice(seq($._statement, choice($._terminator, /\n/)), /\n/)),
-        $._statement,
+      choice(
+        seq(
+          repeat(choice(seq($._statement, choice($._terminator, /\n/)), /\n/)),
+          $._statement,
+        ),
+        repeat1(choice(seq($._statement, choice($._terminator, /\n/)), /\n/)),
       ),
     _statement: ($) =>
       choice(
