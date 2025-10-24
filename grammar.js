@@ -66,7 +66,6 @@ module.exports = grammar({
   externals: ($) => [
     $.dollar_expansion,
     $.hat_expansion,
-    $.out_param,
     $.environment_variable_name,
     $.environment_equals,
     $.error_sentinel,
@@ -132,7 +131,6 @@ module.exports = grammar({
       choice(
         $.variable_declaration,
         $.variable_assignment,
-        $.constant_declaration,
         $.expression_mode,
         $.command_call,
         $.function_definition,
@@ -274,15 +272,18 @@ module.exports = grammar({
         optional($._terminator),
         "}",
       ),
-    block_assignment: ($) =>
-      seq($.variable_name, optional($._variable_access), "=", $._expression),
     proc_return: ($) => seq("return", $._literal),
     variable_declaration: ($) =>
-      seq(
-        "var",
-        field("variable", $.variable_name),
-        "=",
-        field("value", $._expression),
+      prec.left(
+        -10,
+        seq(
+          choice(
+            seq("var", field("variable", $.variable_name)),
+            seq("const", field("constant", $.variable_name)),
+          ),
+          "=",
+          field("value", $._expression),
+        ),
       ),
     variable_assignment: ($) =>
       seq(
@@ -291,13 +292,6 @@ module.exports = grammar({
         optional($._variable_access),
         choice("=", "+=", "-=", "*=", "/="),
         field("value", $._expression),
-      ),
-    constant_declaration: ($) =>
-      seq(
-        "const",
-        field("constant", $.variable_name),
-        "=",
-        $._expression,
       ),
     command_call: ($) =>
       prec.left(seq(
@@ -308,7 +302,6 @@ module.exports = grammar({
           choice(
             $._literal,
             $.redirection,
-            seq(alias($.out_param, ":"), $.variable_name),
             $.word,
           ),
         ),
@@ -684,7 +677,6 @@ module.exports = grammar({
     function_name: ($) => $.variable_name,
     proc_name: (_) => token(/[-_a-zA-Z0-9]+/),
     function_parameter: ($) => $.variable_name,
-    constant: ($) => $.variable_name,
     glob: ($) => seq($.word, repeat(seq("|", $.word))),
     eggex: ($) => seq("/", repeat(choice($.word, $._literal)), "/"),
     variable_name: (_) => token(/[_a-zA-Z]\w*/),

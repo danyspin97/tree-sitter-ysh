@@ -96,6 +96,7 @@
 (null) @constant.builtin
 
 variable: (variable_name) @variable
+constant: (variable_name) @constant
 ((variable_name) @variable
              (#set! priority 20))
 (variable_assignment key: (variable_name) @property)
@@ -132,8 +133,6 @@ key: (variable_name) @variable.member
 
 ; (function_call) @function.call
 ; ((function_name) @function.builtin (#any-of? @function.builtin "echo" "cat"))
-
-; (constant) @constant
 
 [
   "("

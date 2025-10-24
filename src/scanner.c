@@ -4,7 +4,6 @@
 enum TokenType {
   DOLLAR_EXPANSION,
   HAT_EXPANSION,
-  OUT_PARAM,
   ENV_VAR_NAME,
   ENV_EQUALS,
   ERROR_SENTINEL,
@@ -76,16 +75,6 @@ bool tree_sitter_ysh_external_scanner_scan(void *payload, TSLexer *lexer,
       if (is_alnum_(lexer->lookahead) || lexer->lookahead == '[' ||
           lexer->lookahead == '(') {
         lexer->result_symbol = HAT_EXPANSION;
-        return true;
-      }
-    }
-  }
-
-  if (valid_symbols[OUT_PARAM]) {
-    if (lexer->lookahead == ':') {
-      lexer->advance(lexer, false);
-      if (is_alnum_(lexer->lookahead)) {
-        lexer->result_symbol = OUT_PARAM;
         return true;
       }
     }

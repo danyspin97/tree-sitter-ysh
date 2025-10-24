@@ -71,7 +71,7 @@ Const declaration
 const myconst = 'mystr'
 ---
 (program
-  (constant_declaration
+  (variable_declaration
     (variable_name)
     (string)))
 
@@ -226,7 +226,7 @@ Const declaration with expansion
 const YSH = $(command -v ysh)
 ---
 (program
-  (constant_declaration
+  (variable_declaration
     (variable_name)
     (expansion
       (command_call

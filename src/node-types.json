@@ -12,10 +12,6 @@
         "named": true
       },
       {
-        "type": "constant_declaration",
-        "named": true
-      },
-      {
         "type": "expression_mode",
         "named": true
       },
@@ -898,10 +894,6 @@
           "named": true
         },
         {
-          "type": "constant_declaration",
-          "named": true
-        },
-        {
           "type": "environment",
           "named": true
         },
@@ -954,10 +946,6 @@
           "named": true
         },
         {
-          "type": "variable_name",
-          "named": true
-        },
-        {
           "type": "while_statement",
           "named": true
         },
@@ -986,200 +974,6 @@
         },
         {
           "type": "word",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "constant_declaration",
-    "named": true,
-    "fields": {
-      "constant": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "variable_name",
-            "named": true
-          }
-        ]
-      },
-      "key": {
-        "multiple": true,
-        "required": false,
-        "types": [
-          {
-            "type": "(",
-            "named": false
-          },
-          {
-            "type": ")",
-            "named": false
-          },
-          {
-            "type": ".",
-            "named": false
-          },
-          {
-            "type": "[",
-            "named": false
-          },
-          {
-            "type": "]",
-            "named": false
-          },
-          {
-            "type": "binary_expression",
-            "named": true
-          },
-          {
-            "type": "boolean",
-            "named": true
-          },
-          {
-            "type": "dict",
-            "named": true
-          },
-          {
-            "type": "eggex",
-            "named": true
-          },
-          {
-            "type": "escaped_double_quote",
-            "named": true
-          },
-          {
-            "type": "escaped_newline_value",
-            "named": true
-          },
-          {
-            "type": "escaped_single_quote",
-            "named": true
-          },
-          {
-            "type": "expansion",
-            "named": true
-          },
-          {
-            "type": "function_call",
-            "named": true
-          },
-          {
-            "type": "list",
-            "named": true
-          },
-          {
-            "type": "literal_list",
-            "named": true
-          },
-          {
-            "type": "method_call",
-            "named": true
-          },
-          {
-            "type": "null",
-            "named": true
-          },
-          {
-            "type": "number",
-            "named": true
-          },
-          {
-            "type": "string",
-            "named": true
-          },
-          {
-            "type": "unary_expression",
-            "named": true
-          },
-          {
-            "type": "variable_name",
-            "named": true
-          }
-        ]
-      },
-      "member": {
-        "multiple": true,
-        "required": false,
-        "types": [
-          {
-            "type": "variable_name",
-            "named": true
-          }
-        ]
-      }
-    },
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "binary_expression",
-          "named": true
-        },
-        {
-          "type": "boolean",
-          "named": true
-        },
-        {
-          "type": "dict",
-          "named": true
-        },
-        {
-          "type": "eggex",
-          "named": true
-        },
-        {
-          "type": "escaped_double_quote",
-          "named": true
-        },
-        {
-          "type": "escaped_newline_value",
-          "named": true
-        },
-        {
-          "type": "escaped_single_quote",
-          "named": true
-        },
-        {
-          "type": "expansion",
-          "named": true
-        },
-        {
-          "type": "function_call",
-          "named": true
-        },
-        {
-          "type": "list",
-          "named": true
-        },
-        {
-          "type": "literal_list",
-          "named": true
-        },
-        {
-          "type": "method_call",
-          "named": true
-        },
-        {
-          "type": "null",
-          "named": true
-        },
-        {
-          "type": "number",
-          "named": true
-        },
-        {
-          "type": "string",
-          "named": true
-        },
-        {
-          "type": "unary_expression",
-          "named": true
-        },
-        {
-          "type": "variable_name",
           "named": true
         }
       ]
@@ -4125,6 +3919,16 @@
     "type": "variable_declaration",
     "named": true,
     "fields": {
+      "constant": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "variable_name",
+            "named": true
+          }
+        ]
+      },
       "key": {
         "multiple": true,
         "required": false,
@@ -4325,7 +4129,7 @@
       },
       "variable": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "variable_name",

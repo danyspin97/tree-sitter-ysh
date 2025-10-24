@@ -117,10 +117,6 @@
         },
         {
           "type": "SYMBOL",
-          "name": "constant_declaration"
-        },
-        {
-          "type": "SYMBOL",
           "name": "expression_mode"
         },
         {
@@ -1668,35 +1664,6 @@
         }
       ]
     },
-    "block_assignment": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "SYMBOL",
-          "name": "variable_name"
-        },
-        {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "_variable_access"
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
-        },
-        {
-          "type": "STRING",
-          "value": "="
-        },
-        {
-          "type": "SYMBOL",
-          "name": "_expression"
-        }
-      ]
-    },
     "proc_return": {
       "type": "SEQ",
       "members": [
@@ -1711,33 +1678,64 @@
       ]
     },
     "variable_declaration": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "var"
-        },
-        {
-          "type": "FIELD",
-          "name": "variable",
-          "content": {
-            "type": "SYMBOL",
-            "name": "variable_name"
+      "type": "PREC_LEFT",
+      "value": -10,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": "var"
+                  },
+                  {
+                    "type": "FIELD",
+                    "name": "variable",
+                    "content": {
+                      "type": "SYMBOL",
+                      "name": "variable_name"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": "const"
+                  },
+                  {
+                    "type": "FIELD",
+                    "name": "constant",
+                    "content": {
+                      "type": "SYMBOL",
+                      "name": "variable_name"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "STRING",
+            "value": "="
+          },
+          {
+            "type": "FIELD",
+            "name": "value",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_expression"
+            }
           }
-        },
-        {
-          "type": "STRING",
-          "value": "="
-        },
-        {
-          "type": "FIELD",
-          "name": "value",
-          "content": {
-            "type": "SYMBOL",
-            "name": "_expression"
-          }
-        }
-      ]
+        ]
+      }
     },
     "variable_assignment": {
       "type": "SEQ",
@@ -1810,31 +1808,6 @@
         }
       ]
     },
-    "constant_declaration": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "const"
-        },
-        {
-          "type": "FIELD",
-          "name": "constant",
-          "content": {
-            "type": "SYMBOL",
-            "name": "variable_name"
-          }
-        },
-        {
-          "type": "STRING",
-          "value": "="
-        },
-        {
-          "type": "SYMBOL",
-          "name": "_expression"
-        }
-      ]
-    },
     "command_call": {
       "type": "PREC_LEFT",
       "value": 0,
@@ -1876,24 +1849,6 @@
                 {
                   "type": "SYMBOL",
                   "name": "redirection"
-                },
-                {
-                  "type": "SEQ",
-                  "members": [
-                    {
-                      "type": "ALIAS",
-                      "content": {
-                        "type": "SYMBOL",
-                        "name": "out_param"
-                      },
-                      "named": false,
-                      "value": ":"
-                    },
-                    {
-                      "type": "SYMBOL",
-                      "name": "variable_name"
-                    }
-                  ]
                 },
                 {
                   "type": "SYMBOL",
@@ -4529,10 +4484,6 @@
       "type": "SYMBOL",
       "name": "variable_name"
     },
-    "constant": {
-      "type": "SYMBOL",
-      "name": "variable_name"
-    },
     "glob": {
       "type": "SEQ",
       "members": [
@@ -4822,10 +4773,6 @@
     {
       "type": "SYMBOL",
       "name": "hat_expansion"
-    },
-    {
-      "type": "SYMBOL",
-      "name": "out_param"
     },
     {
       "type": "SYMBOL",

@@ -349,8 +349,8 @@ proc set-port (port_num;; out) {
 }
 
 Service foo {
-  set-port 80 :p1
-  set-port 81 :p2
+  set-port 80 (&p1)
+  set-port 81 (&p2)
 }
 ---
 (program
@@ -384,12 +384,16 @@ Service foo {
         (command_name
           (word))
         (number)
-        (variable_name))
+        (parameter_list_call
+          (unary_expression
+            (variable_name))))
       (command_call
         (command_name
           (word))
         (number)
-        (variable_name)))))
+        (parameter_list_call
+          (unary_expression
+            (variable_name)))))))
 ============================
 Command chain and statements
 ============================
