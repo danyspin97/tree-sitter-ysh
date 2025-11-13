@@ -1512,17 +1512,21 @@
       ]
     },
     "func_return": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "return"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "_paren_expression"
-        }
-      ]
+      "type": "PREC",
+      "value": 20,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "return"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "_paren_expression"
+          }
+        ]
+      }
     },
     "proc_block": {
       "type": "SEQ",

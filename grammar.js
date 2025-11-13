@@ -239,7 +239,7 @@ module.exports = grammar({
         ),
         "}",
       ),
-    func_return: ($) => seq("return", $._paren_expression),
+    func_return: ($) => prec(20, seq("return", $._paren_expression)),
     proc_block: ($) =>
       seq(
         "{",

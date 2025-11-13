@@ -3,6 +3,7 @@ Simple function declaration
 ===========================
 func foo() {
   var x = ''
+  return (x)
 }
 ---
 (program
@@ -13,7 +14,9 @@ func foo() {
     (func_block
       (variable_declaration
         (variable_name)
-        (string)))))
+        (string))
+        (func_return
+          (variable_name)))))
 ===========================
 Positional parameter
 ===========================
