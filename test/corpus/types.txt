@@ -394,3 +394,25 @@ echo "$conf" >> "$conf_file"
       (string
         (expansion
           (variable_name))))))
+==================
+Hay data structure
+==================
+hay Struct
+
+Struct mystruct {
+    val = 'foo'
+}
+---
+(program
+  (command_call
+    (command_name
+      (word))
+    (word))
+  (command_call
+    (command_name
+      (word))
+    (word)
+    (block
+      (const_declaration
+        (variable_name)
+        (string)))))

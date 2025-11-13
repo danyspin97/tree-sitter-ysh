@@ -68,6 +68,7 @@ module.exports = grammar({
     $.hat_expansion,
     $.environment_variable_name,
     $.environment_equals,
+    $.const_declaration_variable,
     $.error_sentinel,
   ],
   supertypes: ($) => [
@@ -139,6 +140,7 @@ module.exports = grammar({
         $.while_statement,
         $.if_statement,
         $.case_statement,
+        $.const_declaration,
       ),
     _expression: ($) =>
       choice(
@@ -282,6 +284,15 @@ module.exports = grammar({
             seq("const", field("constant", $.variable_name)),
           ),
           "=",
+          field("value", $._expression),
+        ),
+      ),
+    const_declaration: ($) =>
+      prec.left(
+        -20,
+        seq(
+          field("constant", alias($.const_declaration_variable, $.variable_name)),
+          '=',
           field("value", $._expression),
         ),
       ),

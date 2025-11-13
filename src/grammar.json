@@ -146,6 +146,10 @@
         {
           "type": "SYMBOL",
           "name": "case_statement"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "const_declaration"
         }
       ]
     },
@@ -1721,6 +1725,40 @@
                 ]
               }
             ]
+          },
+          {
+            "type": "STRING",
+            "value": "="
+          },
+          {
+            "type": "FIELD",
+            "name": "value",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_expression"
+            }
+          }
+        ]
+      }
+    },
+    "const_declaration": {
+      "type": "PREC_LEFT",
+      "value": -20,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "FIELD",
+            "name": "constant",
+            "content": {
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "const_declaration_variable"
+              },
+              "named": true,
+              "value": "variable_name"
+            }
           },
           {
             "type": "STRING",
@@ -4781,6 +4819,10 @@
     {
       "type": "SYMBOL",
       "name": "environment_equals"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "const_declaration_variable"
     },
     {
       "type": "SYMBOL",
