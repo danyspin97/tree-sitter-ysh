@@ -103,7 +103,7 @@ module.exports = grammar({
           repeat(
             choice(
               $._terminated_statement,
-              /\n/,
+              '\n',
             ),
           ),
           $._statement,
@@ -111,7 +111,7 @@ module.exports = grammar({
         repeat1(
           choice(
             $._terminated_statement,
-            /\n/,
+            '\n',
           ),
         ),
       ),
@@ -565,6 +565,7 @@ module.exports = grammar({
         ["|", PREC.BITWISE_OR],
         ["^", PREC.BITWISE_XOR],
         ["&", PREC.BITWISE_AND],
+        [choice(seq("is", optional("not")), "==", "!=", "!==", "===", "~=="), PREC.EQUALITY],
         [choice("==", "!=", "!==", "===", "~=="), PREC.EQUALITY],
         [choice("<", ">", "<=", ">=", "~", "!~", "~~", "!~~"), PREC.COMPARE],
         [choice("<<", ">>"), PREC.SHIFT],
@@ -609,7 +610,7 @@ module.exports = grammar({
             ">>&",
             "<<<",
           ),
-          choice($.word, $._literal),
+          field("redirection_value", choice($.word, $._literal)),
         ),
       ),
     _double_quotes_string: ($) =>
@@ -658,7 +659,7 @@ module.exports = grammar({
     _byte_string: ($) =>
       choice(
         seq(
-          "b'",
+          seq(choice("$", "b"), "'"),
           repeat(choice(
             /[^\\']+/,
             $.escape_sequence,
@@ -667,7 +668,7 @@ module.exports = grammar({
           "'",
         ),
         seq(
-          "b'''",
+          seq(choice("$", "b"), "'''"),
           repeat(choice(
             /[^\\']+/,
             $.escape_sequence,
@@ -677,7 +678,7 @@ module.exports = grammar({
           "'''",
         ),
       ),
-    _single_quotes_string: (_) => choice(/'[^'\\]*'/, /'''[^'\\]*'''/),
+    _single_quotes_string: (_) => choice(/'[^'\\]*'/, /'''[^\\]*'''/),
     _raw_string: (_) => choice(/r'[^']*'/, /r'''[^']*'''/),
     escaped_double_quote: (_) => '\\"',
     escaped_single_quote: (_) => "\\'",
@@ -708,7 +709,7 @@ module.exports = grammar({
     escaped_bytes: (_) => /\\y[a-fA-F0-9]{2}/,
     escape_sequence: (_) =>
       choice(
-        /\\[\"\'\\\/bfnrt]/,
+        /\\["'\\/bfnrt]/,
         /\\u\{[0-9a-fA-F]{2,5}\}/,
       ),
     null: (_) => "null",
@@ -804,7 +805,11 @@ function tokenLiterals(precedence, ...literals) {
  */
 function rest_of_arguments(self, rule) {
   return choice(
-    seq(commaSep(rule), optional(seq(",", self.rest_of_arguments))),
+    seq(
+      commaSep(rule),
+      optional(seq(
+        ",",
+        self.rest_of_arguments))),
     optional(self.rest_of_arguments),
   );
 }

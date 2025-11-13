@@ -256,7 +256,7 @@
         ]
       },
       "operator": {
-        "multiple": false,
+        "multiple": true,
         "required": true,
         "types": [
           {
@@ -349,6 +349,14 @@
           },
           {
             "type": "and",
+            "named": false
+          },
+          {
+            "type": "is",
+            "named": false
+          },
+          {
+            "type": "not",
             "named": false
           },
           {
@@ -3665,29 +3673,40 @@
   {
     "type": "redirection",
     "named": true,
-    "fields": {},
+    "fields": {
+      "redirection_value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "boolean",
+            "named": true
+          },
+          {
+            "type": "expansion",
+            "named": true
+          },
+          {
+            "type": "number",
+            "named": true
+          },
+          {
+            "type": "string",
+            "named": true
+          },
+          {
+            "type": "word",
+            "named": true
+          }
+        ]
+      }
+    },
     "children": {
-      "multiple": true,
-      "required": true,
+      "multiple": false,
+      "required": false,
       "types": [
         {
-          "type": "boolean",
-          "named": true
-        },
-        {
-          "type": "expansion",
-          "named": true
-        },
-        {
           "type": "number",
-          "named": true
-        },
-        {
-          "type": "string",
-          "named": true
-        },
-        {
-          "type": "word",
           "named": true
         }
       ]
@@ -4790,11 +4809,7 @@
     "named": false
   },
   {
-    "type": "b'",
-    "named": false
-  },
-  {
-    "type": "b'''",
+    "type": "b",
     "named": false
   },
   {
@@ -4865,6 +4880,10 @@
   },
   {
     "type": "in",
+    "named": false
+  },
+  {
+    "type": "is",
     "named": false
   },
   {

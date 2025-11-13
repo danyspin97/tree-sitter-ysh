@@ -56,6 +56,7 @@
   "&"
   ">>"
   "<<"
+  "<<<"
   ">>&"
   "&>>"
   "%"
@@ -90,6 +91,7 @@
   "or"
   "and"
   "not"
+  "is"
 ] @keyword.operator
 
 (boolean) @boolean
@@ -153,5 +155,7 @@ key: (variable_name) @variable.member
  ";"
  "@"
 ] @punctuation.special
+
+redirection_value: (word) @variable.parameter
 
 (ERROR) @error

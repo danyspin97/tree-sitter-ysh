@@ -236,7 +236,6 @@ var s = "start \
   (variable_declaration
     variable: (variable_name)
     value: (string)))
-
 ==================
 Generated dict key
 ==================
@@ -359,6 +358,15 @@ var l = { 'mykey': 'foo' }
 ===============
 Complex strings
 ===============
+var stdout = '''
+    backticks
+    eval
+    TYPE TASK
+    CODE           
+          echo `echo task backticks`
+          eval 'echo task eval'
+        ___
+    '''
 var conf = """
     (defwindow bar$display
       :monitor "$display"
@@ -375,6 +383,9 @@ var conf = """
 echo "$conf" >> "$conf_file"
 ---
 (program
+  (variable_declaration
+    (variable_name)
+    (string))
   (variable_declaration
     (variable_name)
     (string
