@@ -7,6 +7,18 @@ enum TokenType {
   ENV_VAR_NAME,
   ENV_EQUAL,
   CONST_DECL_VAR,
+  COMMA,
+  SEMICOLON,
+  CLOSE_PAREN,
+  CLOSE_BRACE,
+  CLOSE_BRACKET,
+  CLOSING_LIST,
+  NAMED_PARAM_EQ,
+  NEWLINE,
+  TERMINATOR_SENTINEL,
+  STATEMENT_SENTINEL,
+  MULTILINE_CMD_SENTINEL,
+  COMMA_SENTINEL,
   ERROR_SENTINEL,
 };
 
@@ -40,6 +52,68 @@ bool tree_sitter_ysh_external_scanner_scan(void *payload, TSLexer *lexer,
   // Skip whitespaces
   while (lexer->lookahead == ' ') {
     lexer->advance(lexer, true);
+  }
+
+  while ((valid_symbols[CLOSE_PAREN] || valid_symbols[CLOSE_BRACE] ||
+          valid_symbols[CLOSE_BRACKET] || valid_symbols[COMMA] ||
+          valid_symbols[SEMICOLON] || valid_symbols[CLOSING_LIST] ||
+          valid_symbols[NAMED_PARAM_EQ] || valid_symbols[STATEMENT_SENTINEL]
+          || valid_symbols[MULTILINE_CMD_SENTINEL] || valid_symbols[COMMA_SENTINEL]) &&
+         !valid_symbols[TERMINATOR_SENTINEL] && lexer->lookahead == '\n') {
+    lexer->advance(lexer, false);
+    if (valid_symbols[MULTILINE_CMD_SENTINEL]) {
+        while (lexer->lookahead == ' ') {
+            lexer->advance(lexer, true);
+        }
+        // Two consecutive newlines are not allowed in multiline commands
+        if (lexer->lookahead == '\n') {
+            return false;
+        }
+    }
+    lexer->result_symbol = NEWLINE;
+    return true;
+  }
+
+  if (valid_symbols[COMMA] && lexer->lookahead == ',') {
+    lexer->advance(lexer, false);
+    lexer->result_symbol = COMMA;
+    return true;
+  }
+
+  if (valid_symbols[SEMICOLON] && lexer->lookahead == ';') {
+    lexer->advance(lexer, false);
+    lexer->result_symbol = SEMICOLON;
+    return true;
+  }
+
+  if (valid_symbols[CLOSE_PAREN] && lexer->lookahead == ')') {
+    lexer->advance(lexer, false);
+    lexer->result_symbol = CLOSE_PAREN;
+    return true;
+  }
+
+  if (valid_symbols[CLOSE_BRACE] && lexer->lookahead == '}') {
+    lexer->advance(lexer, false);
+    lexer->result_symbol = CLOSE_BRACE;
+    return true;
+  }
+
+  if (valid_symbols[CLOSE_BRACKET] && lexer->lookahead == ']') {
+    lexer->advance(lexer, false);
+    lexer->result_symbol = CLOSE_BRACKET;
+    return true;
+  }
+
+  if (valid_symbols[CLOSING_LIST] && lexer->lookahead == '|') {
+    lexer->advance(lexer, false);
+    lexer->result_symbol = CLOSING_LIST;
+    return true;
+  }
+
+  if (valid_symbols[NAMED_PARAM_EQ] && lexer->lookahead == '=') {
+    lexer->advance(lexer, false);
+    lexer->result_symbol = NAMED_PARAM_EQ;
+    return true;
   }
 
   if (valid_symbols[DOLLAR_EXPANSION] && lexer->lookahead == '$') {

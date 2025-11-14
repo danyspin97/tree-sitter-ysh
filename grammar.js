@@ -61,6 +61,7 @@ module.exports = grammar({
     /\\\r?\n/,
     /\\( |\t|\v|\f)/,
     $.comment,
+    $._newline,
     $.escaped_newline,
   ],
   externals: ($) => [
@@ -69,10 +70,19 @@ module.exports = grammar({
     $.environment_variable_name,
     $.environment_equals,
     $.const_declaration_variable,
+    $.comma,
+    $.semicolon,
+    $.close_paren,
+    $.close_brace,
+    $.close_bracket,
+    $.closing_list,
+    $.named_parameter_equals,
+    $._newline,
+    $._terminator_sentinel,
+    $._statement_sentinel,
+    $._multiline_command_sentinel,
+    $._comma_sentinel,
     $.error_sentinel,
-  ],
-  supertypes: ($) => [
-    $._statement,
   ],
   reserved: {
     global: (_) => [
@@ -89,43 +99,30 @@ module.exports = grammar({
       "case",
     ],
   },
-  conflicts: (
-    $,
-  ) => [[$.parameter_list_call], [$.proc_block], [
-    $.proc_block,
-    $._statement_terminator,
-  ]],
+  conflicts: ($) => [
+    [$.parameter_list_call],
+    [$._statements, $._statement_terminator]
+  ],
   rules: {
     program: ($) => optional($._statements),
-    _statements: ($) =>
-      choice(
-        seq(
-          repeat(
-            choice(
-              $._terminated_statement,
-              '\n',
-            ),
-          ),
-          $._statement,
-        ),
-        repeat1(
-          choice(
-            $._terminated_statement,
-            '\n',
-          ),
-        ),
-      ),
+    _statements: ($) => seq(
+      repeat(choice($._terminated_statement)),
+      $._statement,
+      prec(-1, repeat("\n")),
+    ),
     _statement: ($) =>
       choice(
         $.multiline_command_call,
-        $._single_line_statement,
+        seq($._single_line_statement, optional($._statement_terminator)),
+        $._statement_sentinel,
       ),
     _terminated_statement: ($) =>
       prec.right(
         10,
         choice(
           seq($._single_line_statement, $._statement_terminator),
-          seq($.multiline_command_call),
+          $.multiline_command_call,
+          $._statement_sentinel,
         ),
       ),
     _single_line_statement: ($) =>
@@ -167,10 +164,10 @@ module.exports = grammar({
         "(",
         rest_of_arguments($, $.function_parameter),
         optional(seq(
-          ";",
+          alias($.semicolon, ";"),
           rest_of_arguments($, $.named_parameter),
         )),
-        ")",
+        alias($.close_paren, ")"),
       ),
     proc_parameter_list: ($) =>
       seq(
@@ -178,19 +175,19 @@ module.exports = grammar({
         rest_of_arguments($, $.function_parameter),
         optional(
           seq(
-            ";",
+            alias($.semicolon, ";"),
             rest_of_arguments($, $.function_parameter),
             optional(seq(
-              ";",
+              alias($.semicolon, ";"),
               choice(
                 rest_of_arguments($, $.named_parameter),
                 rest_of_arguments($, $.function_parameter),
               ),
-              optional(seq(";", optional($.function_parameter))),
+              optional(seq(alias($.semicolon, ";"), optional($.function_parameter))),
             )),
           ),
         ),
-        ")",
+        alias($.close_paren, ")"),
       ),
     parameter_list_call: ($) =>
       seq(
@@ -198,82 +195,36 @@ module.exports = grammar({
         choice(
           seq(
             rest_of_arguments($, $._expression),
-            ";",
+            alias($.semicolon, ";"),
             rest_of_arguments($, $.named_parameter),
           ),
           rest_of_arguments($, choice($.named_parameter, $._expression)),
         ),
-        optional(","),
-        ")",
+        optional(alias($.comma, ",")),
+        alias($.close_paren, ")"),
       ),
     block: ($) =>
       seq(
         "{",
-        repeat(choice("\n", "\\{", "\\}")),
+        repeat($._terminated_statement),
         $._statement,
-        repeat(
-          choice(
-            "\\{",
-            "\\}",
-            "\n",
-            seq($._statement_terminator, $._statement),
-          ),
-        ),
-        "}",
+        alias($.close_brace, "}"),
       ),
-    func_block: ($) =>
-      seq(
-        "{",
-        repeat(choice("\n", "\\{", "\\}")),
-        choice($._statement, $.func_return),
-        repeat(
-          choice(
-            "\\{",
-            "\\}",
-            "\n",
-            seq(
-              $._statement_terminator,
-              choice($._statement, $.func_return),
-            ),
-          ),
-        ),
-        "}",
-      ),
+    func_block: ($) => seq(
+      "{",
+      repeat(seq(choice($._statement, $.func_return), $._statement_terminator)),
+      choice($._statement, $.func_return),
+      optional($._statement_terminator),
+      alias($.close_brace, "}"),
+    ),
     func_return: ($) => prec(20, seq("return", $._paren_expression)),
-    proc_block: ($) =>
-      seq(
-        "{",
-        choice(
-          seq(
-            repeat(
-              choice(
-                "\\{",
-                "\\}",
-                "\n",
-                seq(
-                  choice($._statement, $.proc_return),
-                  $._statement_terminator,
-                ),
-              ),
-            ),
-            choice($._statement, $.proc_return),
-            optional($._statement_terminator),
-          ),
-          repeat1(
-            choice(
-              "\\{",
-              "\\}",
-              "\n",
-              seq(
-                choice($._statement, $.proc_return),
-                $._statement_terminator,
-              ),
-            ),
-          ),
-        ),
-        optional($._terminator),
-        "}",
-      ),
+    proc_block: ($) => seq(
+      "{",
+      repeat(seq(choice($._statement, $.proc_return), $._statement_terminator)),
+      choice($._statement, $.proc_return),
+      optional($._statement_terminator),
+      alias($.close_brace, "}"),
+    ),
     proc_return: ($) => seq("return", $._literal),
     variable_declaration: ($) =>
       prec.left(
@@ -330,15 +281,13 @@ module.exports = grammar({
       prec.right(seq(
         "...",
         $.command_name,
-        optional("\n"),
         repeat(
           choice(
             prec.left(20, seq(choice("|", "&&", "||"), $.command_name)),
-            seq(choice($._command_line, $.comment), "\n"),
+            $._command_line,
           ),
         ),
-        optional($._command_line),
-        $._terminator,
+        choice($._multiline_command_sentinel, $._terminator),
       )),
     _command_line: ($) =>
       prec.right(seq(repeat1(field("argument", choice($._literal, $.word))))),
@@ -348,7 +297,7 @@ module.exports = grammar({
         $.variable_name,
         repeat(
           seq(
-            ",",
+            alias($.comma, ","),
             $.variable_name,
           ),
         ),
@@ -386,13 +335,12 @@ module.exports = grammar({
         "case",
         $._paren_expression,
         "{",
-        repeat(choice("\n", $.case_condition)),
-        "}",
+        repeat($.case_condition),
+        alias($.close_brace, "}")
       )),
     case_condition: ($) =>
       seq(
         choice($.glob, $._paren_expression, $.eggex, seq("(", "else", ")")),
-        repeat("\n"),
         $.block,
       ),
     _paren_expression: ($) =>
@@ -430,20 +378,24 @@ module.exports = grammar({
         seq(
           field("call", $.function_name),
           "(",
-          commaSep($._expression),
+          commaSep($, $._expression),
           optional(
             choice(
-              seq(choice(",", ";"), commaSepWithTrailing($.named_parameter)),
-              ",",
+              seq(
+                choice(alias($.comma, ","), alias($.semicolon, ";")),
+                commaSepWithTrailing($, $.named_parameter)
+              ),
+              alias($.comma, ",")
             ),
           ),
-          ")",
+          alias($.close_paren, ")"),
         ),
       )),
     dict: ($) =>
       seq(
         "{",
         commaSepWithTrailing(
+          $,
           seq(
             choice(
               field("key", $.variable_name),
@@ -454,15 +406,14 @@ module.exports = grammar({
             $._expression,
           ),
         ),
-        "}",
+        alias($.close_brace, "}"),
       ),
-    list: ($) => seq("[", commaSepWithTrailing($._expression), "]"),
-    literal_list: ($) => seq(":|", repeat(choice("\n", $.word)), "|"),
+    list: ($) => seq("[", commaSepWithTrailing($, $._expression), alias($.close_bracket, "]")),
+    literal_list: ($) => seq(":|", repeat($.word), alias($.closing_list, "|")),
     named_parameter: ($) =>
       seq(
         $.function_parameter,
-        repeat("\n"),
-        "=",
+        alias($.named_parameter_equals, "="),
         repeat("\n"),
         $._expression,
       ),
@@ -517,8 +468,8 @@ module.exports = grammar({
         choice(".", "->"),
         field("method", $.function_name),
         "(",
-        commaSepWithTrailing($._expression),
-        ")",
+        commaSepWithTrailing($, $._expression),
+        alias($.close_paren, ")"),
       ),
     expansion: ($) =>
       choice(
@@ -690,7 +641,7 @@ module.exports = grammar({
     proc_name: (_) => token(/[-_a-zA-Z0-9]+/),
     function_parameter: ($) => $.variable_name,
     glob: ($) => seq($.word, repeat(seq("|", $.word))),
-    eggex: ($) => seq("/", repeat(choice($.word, $._literal)), "/"),
+    eggex: ($) => seq("/", repeat(choice($._literal, prec(-20, /[^"'/]+/))), "/"),
     variable_name: (_) => token(/[_a-zA-Z]\w*/),
     // Do not use literal as a nubmer and a boolean should be parsed as words
     command_name: ($) => choice($.word, $.expansion, $.string),
@@ -728,7 +679,7 @@ module.exports = grammar({
           "\\ ",
         )),
       )),
-    _statement_terminator: ($) => choice($._terminator, "\n"),
+    _statement_terminator: ($) => choice($._terminator, "\n", $._terminator_sentinel),
     _terminator: (_) => choice(";", ";;", "&"),
   },
 });
@@ -753,8 +704,8 @@ function noneOf(...characters) {
  *
  * @returns {ChoiceRule}
  */
-function commaSep(rule) {
-  return optional(commaSep1(rule));
+function commaSep(self, rule) {
+  return optional(commaSep1(self, rule));
 }
 
 /**
@@ -764,8 +715,8 @@ function commaSep(rule) {
  *
  * @returns {SeqRule}
  */
-function commaSepWithTrailing(rule) {
-  return seq(commaSep(rule), optional(seq(",", repeat("\n"))));
+function commaSepWithTrailing(self, rule) {
+  return seq(commaSep(self, rule), optional(alias(self.comma, ",")));
 }
 
 /**
@@ -776,13 +727,11 @@ function commaSepWithTrailing(rule) {
  *
  * @returns {SeqRule}
  */
-function commaSep1(rule) {
+function commaSep1(self, rule) {
   return seq(
-    repeat("\n"),
-    rule,
-    repeat(seq(repeat("\n"), ",", repeat("\n"), rule)),
-    repeat("\n"),
-  );
+    optional(self._comma_sentinel), rule,
+    repeat(seq(alias(self.comma, ","),
+    optional(self._comma_sentinel), rule)));
 }
 
 /**
@@ -806,9 +755,9 @@ function tokenLiterals(precedence, ...literals) {
 function rest_of_arguments(self, rule) {
   return choice(
     seq(
-      commaSep(rule),
+      commaSep(self, rule),
       optional(seq(
-        ",",
+        alias(self.comma, ","),
         self.rest_of_arguments))),
     optional(self.rest_of_arguments),
   );

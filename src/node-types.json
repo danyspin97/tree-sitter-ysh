@@ -1,59 +1,5 @@
 [
   {
-    "type": "_statement",
-    "named": true,
-    "subtypes": [
-      {
-        "type": "case_statement",
-        "named": true
-      },
-      {
-        "type": "command_call",
-        "named": true
-      },
-      {
-        "type": "const_declaration",
-        "named": true
-      },
-      {
-        "type": "expression_mode",
-        "named": true
-      },
-      {
-        "type": "for_statement",
-        "named": true
-      },
-      {
-        "type": "function_definition",
-        "named": true
-      },
-      {
-        "type": "if_statement",
-        "named": true
-      },
-      {
-        "type": "multiline_command_call",
-        "named": true
-      },
-      {
-        "type": "proc_definition",
-        "named": true
-      },
-      {
-        "type": "variable_assignment",
-        "named": true
-      },
-      {
-        "type": "variable_declaration",
-        "named": true
-      },
-      {
-        "type": "while_statement",
-        "named": true
-      }
-    ]
-  },
-  {
     "type": "binary_expression",
     "named": true,
     "fields": {
@@ -483,10 +429,54 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
-          "type": "_statement",
+          "type": "case_statement",
+          "named": true
+        },
+        {
+          "type": "command_call",
+          "named": true
+        },
+        {
+          "type": "const_declaration",
+          "named": true
+        },
+        {
+          "type": "expression_mode",
+          "named": true
+        },
+        {
+          "type": "for_statement",
+          "named": true
+        },
+        {
+          "type": "function_definition",
+          "named": true
+        },
+        {
+          "type": "if_statement",
+          "named": true
+        },
+        {
+          "type": "multiline_command_call",
+          "named": true
+        },
+        {
+          "type": "proc_definition",
+          "named": true
+        },
+        {
+          "type": "variable_assignment",
+          "named": true
+        },
+        {
+          "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "while_statement",
           "named": true
         }
       ]
@@ -1416,10 +1406,6 @@
         {
           "type": "string",
           "named": true
-        },
-        {
-          "type": "word",
-          "named": true
         }
       ]
     }
@@ -2060,14 +2046,58 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
-          "type": "_statement",
+          "type": "case_statement",
+          "named": true
+        },
+        {
+          "type": "command_call",
+          "named": true
+        },
+        {
+          "type": "const_declaration",
+          "named": true
+        },
+        {
+          "type": "expression_mode",
+          "named": true
+        },
+        {
+          "type": "for_statement",
           "named": true
         },
         {
           "type": "func_return",
+          "named": true
+        },
+        {
+          "type": "function_definition",
+          "named": true
+        },
+        {
+          "type": "if_statement",
+          "named": true
+        },
+        {
+          "type": "multiline_command_call",
+          "named": true
+        },
+        {
+          "type": "proc_definition",
+          "named": true
+        },
+        {
+          "type": "variable_assignment",
+          "named": true
+        },
+        {
+          "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "while_statement",
           "named": true
         }
       ]
@@ -3146,10 +3176,6 @@
         {
           "type": "command_name",
           "named": true
-        },
-        {
-          "type": "comment",
-          "named": true
         }
       ]
     }
@@ -3571,11 +3597,55 @@
       "required": false,
       "types": [
         {
-          "type": "_statement",
+          "type": "case_statement",
+          "named": true
+        },
+        {
+          "type": "command_call",
+          "named": true
+        },
+        {
+          "type": "const_declaration",
+          "named": true
+        },
+        {
+          "type": "expression_mode",
+          "named": true
+        },
+        {
+          "type": "for_statement",
+          "named": true
+        },
+        {
+          "type": "function_definition",
+          "named": true
+        },
+        {
+          "type": "if_statement",
+          "named": true
+        },
+        {
+          "type": "multiline_command_call",
+          "named": true
+        },
+        {
+          "type": "proc_definition",
           "named": true
         },
         {
           "type": "proc_return",
+          "named": true
+        },
+        {
+          "type": "variable_assignment",
+          "named": true
+        },
+        {
+          "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "while_statement",
           "named": true
         }
       ]
@@ -3664,7 +3734,51 @@
       "required": false,
       "types": [
         {
-          "type": "_statement",
+          "type": "case_statement",
+          "named": true
+        },
+        {
+          "type": "command_call",
+          "named": true
+        },
+        {
+          "type": "const_declaration",
+          "named": true
+        },
+        {
+          "type": "expression_mode",
+          "named": true
+        },
+        {
+          "type": "for_statement",
+          "named": true
+        },
+        {
+          "type": "function_definition",
+          "named": true
+        },
+        {
+          "type": "if_statement",
+          "named": true
+        },
+        {
+          "type": "multiline_command_call",
+          "named": true
+        },
+        {
+          "type": "proc_definition",
+          "named": true
+        },
+        {
+          "type": "variable_assignment",
+          "named": true
+        },
+        {
+          "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "while_statement",
           "named": true
         }
       ]
@@ -4786,14 +4900,6 @@
   },
   {
     "type": "[",
-    "named": false
-  },
-  {
-    "type": "\\{",
-    "named": false
-  },
-  {
-    "type": "\\}",
     "named": false
   },
   {

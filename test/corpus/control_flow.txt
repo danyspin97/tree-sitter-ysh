@@ -283,7 +283,6 @@ case (s) {
     (variable_name)
     (case_condition
       (eggex
-        (word)
         (string))
       (block
         (command_call

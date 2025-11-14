@@ -15,47 +15,33 @@
       ]
     },
     "_statements": {
-      "type": "CHOICE",
+      "type": "SEQ",
       "members": [
         {
-          "type": "SEQ",
-          "members": [
-            {
-              "type": "REPEAT",
-              "content": {
-                "type": "CHOICE",
-                "members": [
-                  {
-                    "type": "SYMBOL",
-                    "name": "_terminated_statement"
-                  },
-                  {
-                    "type": "STRING",
-                    "value": "\n"
-                  }
-                ]
-              }
-            },
-            {
-              "type": "SYMBOL",
-              "name": "_statement"
-            }
-          ]
-        },
-        {
-          "type": "REPEAT1",
+          "type": "REPEAT",
           "content": {
             "type": "CHOICE",
             "members": [
               {
                 "type": "SYMBOL",
                 "name": "_terminated_statement"
-              },
-              {
-                "type": "STRING",
-                "value": "\n"
               }
             ]
+          }
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_statement"
+        },
+        {
+          "type": "PREC",
+          "value": -1,
+          "content": {
+            "type": "REPEAT",
+            "content": {
+              "type": "STRING",
+              "value": "\n"
+            }
           }
         }
       ]
@@ -68,8 +54,29 @@
           "name": "multiline_command_call"
         },
         {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_single_line_statement"
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "_statement_terminator"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            }
+          ]
+        },
+        {
           "type": "SYMBOL",
-          "name": "_single_line_statement"
+          "name": "_statement_sentinel"
         }
       ]
     },
@@ -93,13 +100,12 @@
             ]
           },
           {
-            "type": "SEQ",
-            "members": [
-              {
-                "type": "SYMBOL",
-                "name": "multiline_command_call"
-              }
-            ]
+            "type": "SYMBOL",
+            "name": "multiline_command_call"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "_statement_sentinel"
           }
         ]
       }
@@ -269,11 +275,16 @@
                       "type": "SEQ",
                       "members": [
                         {
-                          "type": "REPEAT",
-                          "content": {
-                            "type": "STRING",
-                            "value": "\n"
-                          }
+                          "type": "CHOICE",
+                          "members": [
+                            {
+                              "type": "SYMBOL",
+                              "name": "_comma_sentinel"
+                            },
+                            {
+                              "type": "BLANK"
+                            }
+                          ]
                         },
                         {
                           "type": "SYMBOL",
@@ -285,35 +296,31 @@
                             "type": "SEQ",
                             "members": [
                               {
-                                "type": "REPEAT",
+                                "type": "ALIAS",
                                 "content": {
-                                  "type": "STRING",
-                                  "value": "\n"
-                                }
-                              },
-                              {
-                                "type": "STRING",
+                                  "type": "SYMBOL",
+                                  "name": "comma"
+                                },
+                                "named": false,
                                 "value": ","
                               },
                               {
-                                "type": "REPEAT",
-                                "content": {
-                                  "type": "STRING",
-                                  "value": "\n"
-                                }
+                                "type": "CHOICE",
+                                "members": [
+                                  {
+                                    "type": "SYMBOL",
+                                    "name": "_comma_sentinel"
+                                  },
+                                  {
+                                    "type": "BLANK"
+                                  }
+                                ]
                               },
                               {
                                 "type": "SYMBOL",
                                 "name": "function_parameter"
                               }
                             ]
-                          }
-                        },
-                        {
-                          "type": "REPEAT",
-                          "content": {
-                            "type": "STRING",
-                            "value": "\n"
                           }
                         }
                       ]
@@ -330,8 +337,25 @@
                       "type": "SEQ",
                       "members": [
                         {
-                          "type": "STRING",
+                          "type": "ALIAS",
+                          "content": {
+                            "type": "SYMBOL",
+                            "name": "comma"
+                          },
+                          "named": false,
                           "value": ","
+                        },
+                        {
+                          "type": "CHOICE",
+                          "members": [
+                            {
+                              "type": "SYMBOL",
+                              "name": "_comma_sentinel"
+                            },
+                            {
+                              "type": "BLANK"
+                            }
+                          ]
                         },
                         {
                           "type": "SYMBOL",
@@ -347,14 +371,31 @@
               ]
             },
             {
-              "type": "CHOICE",
+              "type": "SEQ",
               "members": [
                 {
-                  "type": "SYMBOL",
-                  "name": "rest_of_arguments"
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "_comma_sentinel"
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
                 },
                 {
-                  "type": "BLANK"
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "rest_of_arguments"
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
                 }
               ]
             }
@@ -367,7 +408,12 @@
               "type": "SEQ",
               "members": [
                 {
-                  "type": "STRING",
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "semicolon"
+                  },
+                  "named": false,
                   "value": ";"
                 },
                 {
@@ -383,11 +429,16 @@
                               "type": "SEQ",
                               "members": [
                                 {
-                                  "type": "REPEAT",
-                                  "content": {
-                                    "type": "STRING",
-                                    "value": "\n"
-                                  }
+                                  "type": "CHOICE",
+                                  "members": [
+                                    {
+                                      "type": "SYMBOL",
+                                      "name": "_comma_sentinel"
+                                    },
+                                    {
+                                      "type": "BLANK"
+                                    }
+                                  ]
                                 },
                                 {
                                   "type": "SYMBOL",
@@ -399,35 +450,31 @@
                                     "type": "SEQ",
                                     "members": [
                                       {
-                                        "type": "REPEAT",
+                                        "type": "ALIAS",
                                         "content": {
-                                          "type": "STRING",
-                                          "value": "\n"
-                                        }
-                                      },
-                                      {
-                                        "type": "STRING",
+                                          "type": "SYMBOL",
+                                          "name": "comma"
+                                        },
+                                        "named": false,
                                         "value": ","
                                       },
                                       {
-                                        "type": "REPEAT",
-                                        "content": {
-                                          "type": "STRING",
-                                          "value": "\n"
-                                        }
+                                        "type": "CHOICE",
+                                        "members": [
+                                          {
+                                            "type": "SYMBOL",
+                                            "name": "_comma_sentinel"
+                                          },
+                                          {
+                                            "type": "BLANK"
+                                          }
+                                        ]
                                       },
                                       {
                                         "type": "SYMBOL",
                                         "name": "named_parameter"
                                       }
                                     ]
-                                  }
-                                },
-                                {
-                                  "type": "REPEAT",
-                                  "content": {
-                                    "type": "STRING",
-                                    "value": "\n"
                                   }
                                 }
                               ]
@@ -444,8 +491,25 @@
                               "type": "SEQ",
                               "members": [
                                 {
-                                  "type": "STRING",
+                                  "type": "ALIAS",
+                                  "content": {
+                                    "type": "SYMBOL",
+                                    "name": "comma"
+                                  },
+                                  "named": false,
                                   "value": ","
+                                },
+                                {
+                                  "type": "CHOICE",
+                                  "members": [
+                                    {
+                                      "type": "SYMBOL",
+                                      "name": "_comma_sentinel"
+                                    },
+                                    {
+                                      "type": "BLANK"
+                                    }
+                                  ]
                                 },
                                 {
                                   "type": "SYMBOL",
@@ -461,14 +525,31 @@
                       ]
                     },
                     {
-                      "type": "CHOICE",
+                      "type": "SEQ",
                       "members": [
                         {
-                          "type": "SYMBOL",
-                          "name": "rest_of_arguments"
+                          "type": "CHOICE",
+                          "members": [
+                            {
+                              "type": "SYMBOL",
+                              "name": "_comma_sentinel"
+                            },
+                            {
+                              "type": "BLANK"
+                            }
+                          ]
                         },
                         {
-                          "type": "BLANK"
+                          "type": "CHOICE",
+                          "members": [
+                            {
+                              "type": "SYMBOL",
+                              "name": "rest_of_arguments"
+                            },
+                            {
+                              "type": "BLANK"
+                            }
+                          ]
                         }
                       ]
                     }
@@ -482,7 +563,12 @@
           ]
         },
         {
-          "type": "STRING",
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "close_paren"
+          },
+          "named": false,
           "value": ")"
         }
       ]
@@ -507,11 +593,16 @@
                       "type": "SEQ",
                       "members": [
                         {
-                          "type": "REPEAT",
-                          "content": {
-                            "type": "STRING",
-                            "value": "\n"
-                          }
+                          "type": "CHOICE",
+                          "members": [
+                            {
+                              "type": "SYMBOL",
+                              "name": "_comma_sentinel"
+                            },
+                            {
+                              "type": "BLANK"
+                            }
+                          ]
                         },
                         {
                           "type": "SYMBOL",
@@ -523,35 +614,31 @@
                             "type": "SEQ",
                             "members": [
                               {
-                                "type": "REPEAT",
+                                "type": "ALIAS",
                                 "content": {
-                                  "type": "STRING",
-                                  "value": "\n"
-                                }
-                              },
-                              {
-                                "type": "STRING",
+                                  "type": "SYMBOL",
+                                  "name": "comma"
+                                },
+                                "named": false,
                                 "value": ","
                               },
                               {
-                                "type": "REPEAT",
-                                "content": {
-                                  "type": "STRING",
-                                  "value": "\n"
-                                }
+                                "type": "CHOICE",
+                                "members": [
+                                  {
+                                    "type": "SYMBOL",
+                                    "name": "_comma_sentinel"
+                                  },
+                                  {
+                                    "type": "BLANK"
+                                  }
+                                ]
                               },
                               {
                                 "type": "SYMBOL",
                                 "name": "function_parameter"
                               }
                             ]
-                          }
-                        },
-                        {
-                          "type": "REPEAT",
-                          "content": {
-                            "type": "STRING",
-                            "value": "\n"
                           }
                         }
                       ]
@@ -568,8 +655,25 @@
                       "type": "SEQ",
                       "members": [
                         {
-                          "type": "STRING",
+                          "type": "ALIAS",
+                          "content": {
+                            "type": "SYMBOL",
+                            "name": "comma"
+                          },
+                          "named": false,
                           "value": ","
+                        },
+                        {
+                          "type": "CHOICE",
+                          "members": [
+                            {
+                              "type": "SYMBOL",
+                              "name": "_comma_sentinel"
+                            },
+                            {
+                              "type": "BLANK"
+                            }
+                          ]
                         },
                         {
                           "type": "SYMBOL",
@@ -585,14 +689,31 @@
               ]
             },
             {
-              "type": "CHOICE",
+              "type": "SEQ",
               "members": [
                 {
-                  "type": "SYMBOL",
-                  "name": "rest_of_arguments"
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "_comma_sentinel"
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
                 },
                 {
-                  "type": "BLANK"
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "rest_of_arguments"
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
                 }
               ]
             }
@@ -605,7 +726,12 @@
               "type": "SEQ",
               "members": [
                 {
-                  "type": "STRING",
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "semicolon"
+                  },
+                  "named": false,
                   "value": ";"
                 },
                 {
@@ -621,11 +747,16 @@
                               "type": "SEQ",
                               "members": [
                                 {
-                                  "type": "REPEAT",
-                                  "content": {
-                                    "type": "STRING",
-                                    "value": "\n"
-                                  }
+                                  "type": "CHOICE",
+                                  "members": [
+                                    {
+                                      "type": "SYMBOL",
+                                      "name": "_comma_sentinel"
+                                    },
+                                    {
+                                      "type": "BLANK"
+                                    }
+                                  ]
                                 },
                                 {
                                   "type": "SYMBOL",
@@ -637,35 +768,31 @@
                                     "type": "SEQ",
                                     "members": [
                                       {
-                                        "type": "REPEAT",
+                                        "type": "ALIAS",
                                         "content": {
-                                          "type": "STRING",
-                                          "value": "\n"
-                                        }
-                                      },
-                                      {
-                                        "type": "STRING",
+                                          "type": "SYMBOL",
+                                          "name": "comma"
+                                        },
+                                        "named": false,
                                         "value": ","
                                       },
                                       {
-                                        "type": "REPEAT",
-                                        "content": {
-                                          "type": "STRING",
-                                          "value": "\n"
-                                        }
+                                        "type": "CHOICE",
+                                        "members": [
+                                          {
+                                            "type": "SYMBOL",
+                                            "name": "_comma_sentinel"
+                                          },
+                                          {
+                                            "type": "BLANK"
+                                          }
+                                        ]
                                       },
                                       {
                                         "type": "SYMBOL",
                                         "name": "function_parameter"
                                       }
                                     ]
-                                  }
-                                },
-                                {
-                                  "type": "REPEAT",
-                                  "content": {
-                                    "type": "STRING",
-                                    "value": "\n"
                                   }
                                 }
                               ]
@@ -682,8 +809,25 @@
                               "type": "SEQ",
                               "members": [
                                 {
-                                  "type": "STRING",
+                                  "type": "ALIAS",
+                                  "content": {
+                                    "type": "SYMBOL",
+                                    "name": "comma"
+                                  },
+                                  "named": false,
                                   "value": ","
+                                },
+                                {
+                                  "type": "CHOICE",
+                                  "members": [
+                                    {
+                                      "type": "SYMBOL",
+                                      "name": "_comma_sentinel"
+                                    },
+                                    {
+                                      "type": "BLANK"
+                                    }
+                                  ]
                                 },
                                 {
                                   "type": "SYMBOL",
@@ -699,14 +843,31 @@
                       ]
                     },
                     {
-                      "type": "CHOICE",
+                      "type": "SEQ",
                       "members": [
                         {
-                          "type": "SYMBOL",
-                          "name": "rest_of_arguments"
+                          "type": "CHOICE",
+                          "members": [
+                            {
+                              "type": "SYMBOL",
+                              "name": "_comma_sentinel"
+                            },
+                            {
+                              "type": "BLANK"
+                            }
+                          ]
                         },
                         {
-                          "type": "BLANK"
+                          "type": "CHOICE",
+                          "members": [
+                            {
+                              "type": "SYMBOL",
+                              "name": "rest_of_arguments"
+                            },
+                            {
+                              "type": "BLANK"
+                            }
+                          ]
                         }
                       ]
                     }
@@ -719,7 +880,12 @@
                       "type": "SEQ",
                       "members": [
                         {
-                          "type": "STRING",
+                          "type": "ALIAS",
+                          "content": {
+                            "type": "SYMBOL",
+                            "name": "semicolon"
+                          },
+                          "named": false,
                           "value": ";"
                         },
                         {
@@ -738,11 +904,16 @@
                                           "type": "SEQ",
                                           "members": [
                                             {
-                                              "type": "REPEAT",
-                                              "content": {
-                                                "type": "STRING",
-                                                "value": "\n"
-                                              }
+                                              "type": "CHOICE",
+                                              "members": [
+                                                {
+                                                  "type": "SYMBOL",
+                                                  "name": "_comma_sentinel"
+                                                },
+                                                {
+                                                  "type": "BLANK"
+                                                }
+                                              ]
                                             },
                                             {
                                               "type": "SYMBOL",
@@ -754,35 +925,31 @@
                                                 "type": "SEQ",
                                                 "members": [
                                                   {
-                                                    "type": "REPEAT",
+                                                    "type": "ALIAS",
                                                     "content": {
-                                                      "type": "STRING",
-                                                      "value": "\n"
-                                                    }
-                                                  },
-                                                  {
-                                                    "type": "STRING",
+                                                      "type": "SYMBOL",
+                                                      "name": "comma"
+                                                    },
+                                                    "named": false,
                                                     "value": ","
                                                   },
                                                   {
-                                                    "type": "REPEAT",
-                                                    "content": {
-                                                      "type": "STRING",
-                                                      "value": "\n"
-                                                    }
+                                                    "type": "CHOICE",
+                                                    "members": [
+                                                      {
+                                                        "type": "SYMBOL",
+                                                        "name": "_comma_sentinel"
+                                                      },
+                                                      {
+                                                        "type": "BLANK"
+                                                      }
+                                                    ]
                                                   },
                                                   {
                                                     "type": "SYMBOL",
                                                     "name": "named_parameter"
                                                   }
                                                 ]
-                                              }
-                                            },
-                                            {
-                                              "type": "REPEAT",
-                                              "content": {
-                                                "type": "STRING",
-                                                "value": "\n"
                                               }
                                             }
                                           ]
@@ -799,8 +966,25 @@
                                           "type": "SEQ",
                                           "members": [
                                             {
-                                              "type": "STRING",
+                                              "type": "ALIAS",
+                                              "content": {
+                                                "type": "SYMBOL",
+                                                "name": "comma"
+                                              },
+                                              "named": false,
                                               "value": ","
+                                            },
+                                            {
+                                              "type": "CHOICE",
+                                              "members": [
+                                                {
+                                                  "type": "SYMBOL",
+                                                  "name": "_comma_sentinel"
+                                                },
+                                                {
+                                                  "type": "BLANK"
+                                                }
+                                              ]
                                             },
                                             {
                                               "type": "SYMBOL",
@@ -816,14 +1000,31 @@
                                   ]
                                 },
                                 {
-                                  "type": "CHOICE",
+                                  "type": "SEQ",
                                   "members": [
                                     {
-                                      "type": "SYMBOL",
-                                      "name": "rest_of_arguments"
+                                      "type": "CHOICE",
+                                      "members": [
+                                        {
+                                          "type": "SYMBOL",
+                                          "name": "_comma_sentinel"
+                                        },
+                                        {
+                                          "type": "BLANK"
+                                        }
+                                      ]
                                     },
                                     {
-                                      "type": "BLANK"
+                                      "type": "CHOICE",
+                                      "members": [
+                                        {
+                                          "type": "SYMBOL",
+                                          "name": "rest_of_arguments"
+                                        },
+                                        {
+                                          "type": "BLANK"
+                                        }
+                                      ]
                                     }
                                   ]
                                 }
@@ -842,11 +1043,16 @@
                                           "type": "SEQ",
                                           "members": [
                                             {
-                                              "type": "REPEAT",
-                                              "content": {
-                                                "type": "STRING",
-                                                "value": "\n"
-                                              }
+                                              "type": "CHOICE",
+                                              "members": [
+                                                {
+                                                  "type": "SYMBOL",
+                                                  "name": "_comma_sentinel"
+                                                },
+                                                {
+                                                  "type": "BLANK"
+                                                }
+                                              ]
                                             },
                                             {
                                               "type": "SYMBOL",
@@ -858,35 +1064,31 @@
                                                 "type": "SEQ",
                                                 "members": [
                                                   {
-                                                    "type": "REPEAT",
+                                                    "type": "ALIAS",
                                                     "content": {
-                                                      "type": "STRING",
-                                                      "value": "\n"
-                                                    }
-                                                  },
-                                                  {
-                                                    "type": "STRING",
+                                                      "type": "SYMBOL",
+                                                      "name": "comma"
+                                                    },
+                                                    "named": false,
                                                     "value": ","
                                                   },
                                                   {
-                                                    "type": "REPEAT",
-                                                    "content": {
-                                                      "type": "STRING",
-                                                      "value": "\n"
-                                                    }
+                                                    "type": "CHOICE",
+                                                    "members": [
+                                                      {
+                                                        "type": "SYMBOL",
+                                                        "name": "_comma_sentinel"
+                                                      },
+                                                      {
+                                                        "type": "BLANK"
+                                                      }
+                                                    ]
                                                   },
                                                   {
                                                     "type": "SYMBOL",
                                                     "name": "function_parameter"
                                                   }
                                                 ]
-                                              }
-                                            },
-                                            {
-                                              "type": "REPEAT",
-                                              "content": {
-                                                "type": "STRING",
-                                                "value": "\n"
                                               }
                                             }
                                           ]
@@ -903,8 +1105,25 @@
                                           "type": "SEQ",
                                           "members": [
                                             {
-                                              "type": "STRING",
+                                              "type": "ALIAS",
+                                              "content": {
+                                                "type": "SYMBOL",
+                                                "name": "comma"
+                                              },
+                                              "named": false,
                                               "value": ","
+                                            },
+                                            {
+                                              "type": "CHOICE",
+                                              "members": [
+                                                {
+                                                  "type": "SYMBOL",
+                                                  "name": "_comma_sentinel"
+                                                },
+                                                {
+                                                  "type": "BLANK"
+                                                }
+                                              ]
                                             },
                                             {
                                               "type": "SYMBOL",
@@ -920,14 +1139,31 @@
                                   ]
                                 },
                                 {
-                                  "type": "CHOICE",
+                                  "type": "SEQ",
                                   "members": [
                                     {
-                                      "type": "SYMBOL",
-                                      "name": "rest_of_arguments"
+                                      "type": "CHOICE",
+                                      "members": [
+                                        {
+                                          "type": "SYMBOL",
+                                          "name": "_comma_sentinel"
+                                        },
+                                        {
+                                          "type": "BLANK"
+                                        }
+                                      ]
                                     },
                                     {
-                                      "type": "BLANK"
+                                      "type": "CHOICE",
+                                      "members": [
+                                        {
+                                          "type": "SYMBOL",
+                                          "name": "rest_of_arguments"
+                                        },
+                                        {
+                                          "type": "BLANK"
+                                        }
+                                      ]
                                     }
                                   ]
                                 }
@@ -942,7 +1178,12 @@
                               "type": "SEQ",
                               "members": [
                                 {
-                                  "type": "STRING",
+                                  "type": "ALIAS",
+                                  "content": {
+                                    "type": "SYMBOL",
+                                    "name": "semicolon"
+                                  },
+                                  "named": false,
                                   "value": ";"
                                 },
                                 {
@@ -979,7 +1220,12 @@
           ]
         },
         {
-          "type": "STRING",
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "close_paren"
+          },
+          "named": false,
           "value": ")"
         }
       ]
@@ -1010,11 +1256,16 @@
                               "type": "SEQ",
                               "members": [
                                 {
-                                  "type": "REPEAT",
-                                  "content": {
-                                    "type": "STRING",
-                                    "value": "\n"
-                                  }
+                                  "type": "CHOICE",
+                                  "members": [
+                                    {
+                                      "type": "SYMBOL",
+                                      "name": "_comma_sentinel"
+                                    },
+                                    {
+                                      "type": "BLANK"
+                                    }
+                                  ]
                                 },
                                 {
                                   "type": "SYMBOL",
@@ -1026,35 +1277,31 @@
                                     "type": "SEQ",
                                     "members": [
                                       {
-                                        "type": "REPEAT",
+                                        "type": "ALIAS",
                                         "content": {
-                                          "type": "STRING",
-                                          "value": "\n"
-                                        }
-                                      },
-                                      {
-                                        "type": "STRING",
+                                          "type": "SYMBOL",
+                                          "name": "comma"
+                                        },
+                                        "named": false,
                                         "value": ","
                                       },
                                       {
-                                        "type": "REPEAT",
-                                        "content": {
-                                          "type": "STRING",
-                                          "value": "\n"
-                                        }
+                                        "type": "CHOICE",
+                                        "members": [
+                                          {
+                                            "type": "SYMBOL",
+                                            "name": "_comma_sentinel"
+                                          },
+                                          {
+                                            "type": "BLANK"
+                                          }
+                                        ]
                                       },
                                       {
                                         "type": "SYMBOL",
                                         "name": "_expression"
                                       }
                                     ]
-                                  }
-                                },
-                                {
-                                  "type": "REPEAT",
-                                  "content": {
-                                    "type": "STRING",
-                                    "value": "\n"
                                   }
                                 }
                               ]
@@ -1071,8 +1318,25 @@
                               "type": "SEQ",
                               "members": [
                                 {
-                                  "type": "STRING",
+                                  "type": "ALIAS",
+                                  "content": {
+                                    "type": "SYMBOL",
+                                    "name": "comma"
+                                  },
+                                  "named": false,
                                   "value": ","
+                                },
+                                {
+                                  "type": "CHOICE",
+                                  "members": [
+                                    {
+                                      "type": "SYMBOL",
+                                      "name": "_comma_sentinel"
+                                    },
+                                    {
+                                      "type": "BLANK"
+                                    }
+                                  ]
                                 },
                                 {
                                   "type": "SYMBOL",
@@ -1088,21 +1352,43 @@
                       ]
                     },
                     {
-                      "type": "CHOICE",
+                      "type": "SEQ",
                       "members": [
                         {
-                          "type": "SYMBOL",
-                          "name": "rest_of_arguments"
+                          "type": "CHOICE",
+                          "members": [
+                            {
+                              "type": "SYMBOL",
+                              "name": "_comma_sentinel"
+                            },
+                            {
+                              "type": "BLANK"
+                            }
+                          ]
                         },
                         {
-                          "type": "BLANK"
+                          "type": "CHOICE",
+                          "members": [
+                            {
+                              "type": "SYMBOL",
+                              "name": "rest_of_arguments"
+                            },
+                            {
+                              "type": "BLANK"
+                            }
+                          ]
                         }
                       ]
                     }
                   ]
                 },
                 {
-                  "type": "STRING",
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "semicolon"
+                  },
+                  "named": false,
                   "value": ";"
                 },
                 {
@@ -1118,11 +1404,16 @@
                               "type": "SEQ",
                               "members": [
                                 {
-                                  "type": "REPEAT",
-                                  "content": {
-                                    "type": "STRING",
-                                    "value": "\n"
-                                  }
+                                  "type": "CHOICE",
+                                  "members": [
+                                    {
+                                      "type": "SYMBOL",
+                                      "name": "_comma_sentinel"
+                                    },
+                                    {
+                                      "type": "BLANK"
+                                    }
+                                  ]
                                 },
                                 {
                                   "type": "SYMBOL",
@@ -1134,35 +1425,31 @@
                                     "type": "SEQ",
                                     "members": [
                                       {
-                                        "type": "REPEAT",
+                                        "type": "ALIAS",
                                         "content": {
-                                          "type": "STRING",
-                                          "value": "\n"
-                                        }
-                                      },
-                                      {
-                                        "type": "STRING",
+                                          "type": "SYMBOL",
+                                          "name": "comma"
+                                        },
+                                        "named": false,
                                         "value": ","
                                       },
                                       {
-                                        "type": "REPEAT",
-                                        "content": {
-                                          "type": "STRING",
-                                          "value": "\n"
-                                        }
+                                        "type": "CHOICE",
+                                        "members": [
+                                          {
+                                            "type": "SYMBOL",
+                                            "name": "_comma_sentinel"
+                                          },
+                                          {
+                                            "type": "BLANK"
+                                          }
+                                        ]
                                       },
                                       {
                                         "type": "SYMBOL",
                                         "name": "named_parameter"
                                       }
                                     ]
-                                  }
-                                },
-                                {
-                                  "type": "REPEAT",
-                                  "content": {
-                                    "type": "STRING",
-                                    "value": "\n"
                                   }
                                 }
                               ]
@@ -1179,8 +1466,25 @@
                               "type": "SEQ",
                               "members": [
                                 {
-                                  "type": "STRING",
+                                  "type": "ALIAS",
+                                  "content": {
+                                    "type": "SYMBOL",
+                                    "name": "comma"
+                                  },
+                                  "named": false,
                                   "value": ","
+                                },
+                                {
+                                  "type": "CHOICE",
+                                  "members": [
+                                    {
+                                      "type": "SYMBOL",
+                                      "name": "_comma_sentinel"
+                                    },
+                                    {
+                                      "type": "BLANK"
+                                    }
+                                  ]
                                 },
                                 {
                                   "type": "SYMBOL",
@@ -1196,14 +1500,31 @@
                       ]
                     },
                     {
-                      "type": "CHOICE",
+                      "type": "SEQ",
                       "members": [
                         {
-                          "type": "SYMBOL",
-                          "name": "rest_of_arguments"
+                          "type": "CHOICE",
+                          "members": [
+                            {
+                              "type": "SYMBOL",
+                              "name": "_comma_sentinel"
+                            },
+                            {
+                              "type": "BLANK"
+                            }
+                          ]
                         },
                         {
-                          "type": "BLANK"
+                          "type": "CHOICE",
+                          "members": [
+                            {
+                              "type": "SYMBOL",
+                              "name": "rest_of_arguments"
+                            },
+                            {
+                              "type": "BLANK"
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1224,11 +1545,16 @@
                           "type": "SEQ",
                           "members": [
                             {
-                              "type": "REPEAT",
-                              "content": {
-                                "type": "STRING",
-                                "value": "\n"
-                              }
+                              "type": "CHOICE",
+                              "members": [
+                                {
+                                  "type": "SYMBOL",
+                                  "name": "_comma_sentinel"
+                                },
+                                {
+                                  "type": "BLANK"
+                                }
+                              ]
                             },
                             {
                               "type": "CHOICE",
@@ -1249,22 +1575,25 @@
                                 "type": "SEQ",
                                 "members": [
                                   {
-                                    "type": "REPEAT",
+                                    "type": "ALIAS",
                                     "content": {
-                                      "type": "STRING",
-                                      "value": "\n"
-                                    }
-                                  },
-                                  {
-                                    "type": "STRING",
+                                      "type": "SYMBOL",
+                                      "name": "comma"
+                                    },
+                                    "named": false,
                                     "value": ","
                                   },
                                   {
-                                    "type": "REPEAT",
-                                    "content": {
-                                      "type": "STRING",
-                                      "value": "\n"
-                                    }
+                                    "type": "CHOICE",
+                                    "members": [
+                                      {
+                                        "type": "SYMBOL",
+                                        "name": "_comma_sentinel"
+                                      },
+                                      {
+                                        "type": "BLANK"
+                                      }
+                                    ]
                                   },
                                   {
                                     "type": "CHOICE",
@@ -1281,13 +1610,6 @@
                                   }
                                 ]
                               }
-                            },
-                            {
-                              "type": "REPEAT",
-                              "content": {
-                                "type": "STRING",
-                                "value": "\n"
-                              }
                             }
                           ]
                         },
@@ -1303,8 +1625,25 @@
                           "type": "SEQ",
                           "members": [
                             {
-                              "type": "STRING",
+                              "type": "ALIAS",
+                              "content": {
+                                "type": "SYMBOL",
+                                "name": "comma"
+                              },
+                              "named": false,
                               "value": ","
+                            },
+                            {
+                              "type": "CHOICE",
+                              "members": [
+                                {
+                                  "type": "SYMBOL",
+                                  "name": "_comma_sentinel"
+                                },
+                                {
+                                  "type": "BLANK"
+                                }
+                              ]
                             },
                             {
                               "type": "SYMBOL",
@@ -1320,14 +1659,31 @@
                   ]
                 },
                 {
-                  "type": "CHOICE",
+                  "type": "SEQ",
                   "members": [
                     {
-                      "type": "SYMBOL",
-                      "name": "rest_of_arguments"
+                      "type": "CHOICE",
+                      "members": [
+                        {
+                          "type": "SYMBOL",
+                          "name": "_comma_sentinel"
+                        },
+                        {
+                          "type": "BLANK"
+                        }
+                      ]
                     },
                     {
-                      "type": "BLANK"
+                      "type": "CHOICE",
+                      "members": [
+                        {
+                          "type": "SYMBOL",
+                          "name": "rest_of_arguments"
+                        },
+                        {
+                          "type": "BLANK"
+                        }
+                      ]
                     }
                   ]
                 }
@@ -1339,7 +1695,12 @@
           "type": "CHOICE",
           "members": [
             {
-              "type": "STRING",
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "comma"
+              },
+              "named": false,
               "value": ","
             },
             {
@@ -1348,7 +1709,12 @@
           ]
         },
         {
-          "type": "STRING",
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "close_paren"
+          },
+          "named": false,
           "value": ")"
         }
       ]
@@ -1363,21 +1729,8 @@
         {
           "type": "REPEAT",
           "content": {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "STRING",
-                "value": "\n"
-              },
-              {
-                "type": "STRING",
-                "value": "\\{"
-              },
-              {
-                "type": "STRING",
-                "value": "\\}"
-              }
-            ]
+            "type": "SYMBOL",
+            "name": "_terminated_statement"
           }
         },
         {
@@ -1385,40 +1738,12 @@
           "name": "_statement"
         },
         {
-          "type": "REPEAT",
+          "type": "ALIAS",
           "content": {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "STRING",
-                "value": "\\{"
-              },
-              {
-                "type": "STRING",
-                "value": "\\}"
-              },
-              {
-                "type": "STRING",
-                "value": "\n"
-              },
-              {
-                "type": "SEQ",
-                "members": [
-                  {
-                    "type": "SYMBOL",
-                    "name": "_statement_terminator"
-                  },
-                  {
-                    "type": "SYMBOL",
-                    "name": "_statement"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "type": "STRING",
+            "type": "SYMBOL",
+            "name": "close_brace"
+          },
+          "named": false,
           "value": "}"
         }
       ]
@@ -1433,19 +1758,24 @@
         {
           "type": "REPEAT",
           "content": {
-            "type": "CHOICE",
+            "type": "SEQ",
             "members": [
               {
-                "type": "STRING",
-                "value": "\n"
+                "type": "CHOICE",
+                "members": [
+                  {
+                    "type": "SYMBOL",
+                    "name": "_statement"
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "func_return"
+                  }
+                ]
               },
               {
-                "type": "STRING",
-                "value": "\\{"
-              },
-              {
-                "type": "STRING",
-                "value": "\\}"
+                "type": "SYMBOL",
+                "name": "_statement_terminator"
               }
             ]
           }
@@ -1464,49 +1794,24 @@
           ]
         },
         {
-          "type": "REPEAT",
-          "content": {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "STRING",
-                "value": "\\{"
-              },
-              {
-                "type": "STRING",
-                "value": "\\}"
-              },
-              {
-                "type": "STRING",
-                "value": "\n"
-              },
-              {
-                "type": "SEQ",
-                "members": [
-                  {
-                    "type": "SYMBOL",
-                    "name": "_statement_terminator"
-                  },
-                  {
-                    "type": "CHOICE",
-                    "members": [
-                      {
-                        "type": "SYMBOL",
-                        "name": "_statement"
-                      },
-                      {
-                        "type": "SYMBOL",
-                        "name": "func_return"
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_statement_terminator"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
         },
         {
-          "type": "STRING",
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "close_brace"
+          },
+          "named": false,
           "value": "}"
         }
       ]
@@ -1536,121 +1841,40 @@
           "value": "{"
         },
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "REPEAT",
-                  "content": {
-                    "type": "CHOICE",
-                    "members": [
-                      {
-                        "type": "STRING",
-                        "value": "\\{"
-                      },
-                      {
-                        "type": "STRING",
-                        "value": "\\}"
-                      },
-                      {
-                        "type": "STRING",
-                        "value": "\n"
-                      },
-                      {
-                        "type": "SEQ",
-                        "members": [
-                          {
-                            "type": "CHOICE",
-                            "members": [
-                              {
-                                "type": "SYMBOL",
-                                "name": "_statement"
-                              },
-                              {
-                                "type": "SYMBOL",
-                                "name": "proc_return"
-                              }
-                            ]
-                          },
-                          {
-                            "type": "SYMBOL",
-                            "name": "_statement_terminator"
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "CHOICE",
-                  "members": [
-                    {
-                      "type": "SYMBOL",
-                      "name": "_statement"
-                    },
-                    {
-                      "type": "SYMBOL",
-                      "name": "proc_return"
-                    }
-                  ]
-                },
-                {
-                  "type": "CHOICE",
-                  "members": [
-                    {
-                      "type": "SYMBOL",
-                      "name": "_statement_terminator"
-                    },
-                    {
-                      "type": "BLANK"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "REPEAT1",
-              "content": {
+          "type": "REPEAT",
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
                 "type": "CHOICE",
                 "members": [
                   {
-                    "type": "STRING",
-                    "value": "\\{"
+                    "type": "SYMBOL",
+                    "name": "_statement"
                   },
                   {
-                    "type": "STRING",
-                    "value": "\\}"
-                  },
-                  {
-                    "type": "STRING",
-                    "value": "\n"
-                  },
-                  {
-                    "type": "SEQ",
-                    "members": [
-                      {
-                        "type": "CHOICE",
-                        "members": [
-                          {
-                            "type": "SYMBOL",
-                            "name": "_statement"
-                          },
-                          {
-                            "type": "SYMBOL",
-                            "name": "proc_return"
-                          }
-                        ]
-                      },
-                      {
-                        "type": "SYMBOL",
-                        "name": "_statement_terminator"
-                      }
-                    ]
+                    "type": "SYMBOL",
+                    "name": "proc_return"
                   }
                 ]
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_statement_terminator"
               }
+            ]
+          }
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_statement"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "proc_return"
             }
           ]
         },
@@ -1659,7 +1883,7 @@
           "members": [
             {
               "type": "SYMBOL",
-              "name": "_terminator"
+              "name": "_statement_terminator"
             },
             {
               "type": "BLANK"
@@ -1667,7 +1891,12 @@
           ]
         },
         {
-          "type": "STRING",
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "close_brace"
+          },
+          "named": false,
           "value": "}"
         }
       ]
@@ -2003,18 +2232,6 @@
             "name": "command_name"
           },
           {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "STRING",
-                "value": "\n"
-              },
-              {
-                "type": "BLANK"
-              }
-            ]
-          },
-          {
             "type": "REPEAT",
             "content": {
               "type": "CHOICE",
@@ -2050,26 +2267,8 @@
                   }
                 },
                 {
-                  "type": "SEQ",
-                  "members": [
-                    {
-                      "type": "CHOICE",
-                      "members": [
-                        {
-                          "type": "SYMBOL",
-                          "name": "_command_line"
-                        },
-                        {
-                          "type": "SYMBOL",
-                          "name": "comment"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "STRING",
-                      "value": "\n"
-                    }
-                  ]
+                  "type": "SYMBOL",
+                  "name": "_command_line"
                 }
               ]
             }
@@ -2079,16 +2278,13 @@
             "members": [
               {
                 "type": "SYMBOL",
-                "name": "_command_line"
+                "name": "_multiline_command_sentinel"
               },
               {
-                "type": "BLANK"
+                "type": "SYMBOL",
+                "name": "_terminator"
               }
             ]
-          },
-          {
-            "type": "SYMBOL",
-            "name": "_terminator"
           }
         ]
       }
@@ -2139,7 +2335,12 @@
             "type": "SEQ",
             "members": [
               {
-                "type": "STRING",
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "comma"
+                },
+                "named": false,
                 "value": ","
               },
               {
@@ -2338,21 +2539,17 @@
           {
             "type": "REPEAT",
             "content": {
-              "type": "CHOICE",
-              "members": [
-                {
-                  "type": "STRING",
-                  "value": "\n"
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "case_condition"
-                }
-              ]
+              "type": "SYMBOL",
+              "name": "case_condition"
             }
           },
           {
-            "type": "STRING",
+            "type": "ALIAS",
+            "content": {
+              "type": "SYMBOL",
+              "name": "close_brace"
+            },
+            "named": false,
             "value": "}"
           }
         ]
@@ -2394,13 +2591,6 @@
               ]
             }
           ]
-        },
-        {
-          "type": "REPEAT",
-          "content": {
-            "type": "STRING",
-            "value": "\n"
-          }
         },
         {
           "type": "SYMBOL",
@@ -2544,11 +2734,16 @@
                     "type": "SEQ",
                     "members": [
                       {
-                        "type": "REPEAT",
-                        "content": {
-                          "type": "STRING",
-                          "value": "\n"
-                        }
+                        "type": "CHOICE",
+                        "members": [
+                          {
+                            "type": "SYMBOL",
+                            "name": "_comma_sentinel"
+                          },
+                          {
+                            "type": "BLANK"
+                          }
+                        ]
                       },
                       {
                         "type": "SYMBOL",
@@ -2560,35 +2755,31 @@
                           "type": "SEQ",
                           "members": [
                             {
-                              "type": "REPEAT",
+                              "type": "ALIAS",
                               "content": {
-                                "type": "STRING",
-                                "value": "\n"
-                              }
-                            },
-                            {
-                              "type": "STRING",
+                                "type": "SYMBOL",
+                                "name": "comma"
+                              },
+                              "named": false,
                               "value": ","
                             },
                             {
-                              "type": "REPEAT",
-                              "content": {
-                                "type": "STRING",
-                                "value": "\n"
-                              }
+                              "type": "CHOICE",
+                              "members": [
+                                {
+                                  "type": "SYMBOL",
+                                  "name": "_comma_sentinel"
+                                },
+                                {
+                                  "type": "BLANK"
+                                }
+                              ]
                             },
                             {
                               "type": "SYMBOL",
                               "name": "_expression"
                             }
                           ]
-                        }
-                      },
-                      {
-                        "type": "REPEAT",
-                        "content": {
-                          "type": "STRING",
-                          "value": "\n"
                         }
                       }
                     ]
@@ -2611,11 +2802,21 @@
                             "type": "CHOICE",
                             "members": [
                               {
-                                "type": "STRING",
+                                "type": "ALIAS",
+                                "content": {
+                                  "type": "SYMBOL",
+                                  "name": "comma"
+                                },
+                                "named": false,
                                 "value": ","
                               },
                               {
-                                "type": "STRING",
+                                "type": "ALIAS",
+                                "content": {
+                                  "type": "SYMBOL",
+                                  "name": "semicolon"
+                                },
+                                "named": false,
                                 "value": ";"
                               }
                             ]
@@ -2630,11 +2831,16 @@
                                     "type": "SEQ",
                                     "members": [
                                       {
-                                        "type": "REPEAT",
-                                        "content": {
-                                          "type": "STRING",
-                                          "value": "\n"
-                                        }
+                                        "type": "CHOICE",
+                                        "members": [
+                                          {
+                                            "type": "SYMBOL",
+                                            "name": "_comma_sentinel"
+                                          },
+                                          {
+                                            "type": "BLANK"
+                                          }
+                                        ]
                                       },
                                       {
                                         "type": "SYMBOL",
@@ -2646,35 +2852,31 @@
                                           "type": "SEQ",
                                           "members": [
                                             {
-                                              "type": "REPEAT",
+                                              "type": "ALIAS",
                                               "content": {
-                                                "type": "STRING",
-                                                "value": "\n"
-                                              }
-                                            },
-                                            {
-                                              "type": "STRING",
+                                                "type": "SYMBOL",
+                                                "name": "comma"
+                                              },
+                                              "named": false,
                                               "value": ","
                                             },
                                             {
-                                              "type": "REPEAT",
-                                              "content": {
-                                                "type": "STRING",
-                                                "value": "\n"
-                                              }
+                                              "type": "CHOICE",
+                                              "members": [
+                                                {
+                                                  "type": "SYMBOL",
+                                                  "name": "_comma_sentinel"
+                                                },
+                                                {
+                                                  "type": "BLANK"
+                                                }
+                                              ]
                                             },
                                             {
                                               "type": "SYMBOL",
                                               "name": "named_parameter"
                                             }
                                           ]
-                                        }
-                                      },
-                                      {
-                                        "type": "REPEAT",
-                                        "content": {
-                                          "type": "STRING",
-                                          "value": "\n"
                                         }
                                       }
                                     ]
@@ -2688,20 +2890,13 @@
                                 "type": "CHOICE",
                                 "members": [
                                   {
-                                    "type": "SEQ",
-                                    "members": [
-                                      {
-                                        "type": "STRING",
-                                        "value": ","
-                                      },
-                                      {
-                                        "type": "REPEAT",
-                                        "content": {
-                                          "type": "STRING",
-                                          "value": "\n"
-                                        }
-                                      }
-                                    ]
+                                    "type": "ALIAS",
+                                    "content": {
+                                      "type": "SYMBOL",
+                                      "name": "comma"
+                                    },
+                                    "named": false,
+                                    "value": ","
                                   },
                                   {
                                     "type": "BLANK"
@@ -2713,7 +2908,12 @@
                         ]
                       },
                       {
-                        "type": "STRING",
+                        "type": "ALIAS",
+                        "content": {
+                          "type": "SYMBOL",
+                          "name": "comma"
+                        },
+                        "named": false,
                         "value": ","
                       }
                     ]
@@ -2724,7 +2924,12 @@
                 ]
               },
               {
-                "type": "STRING",
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "close_paren"
+                },
+                "named": false,
                 "value": ")"
               }
             ]
@@ -2749,11 +2954,16 @@
                   "type": "SEQ",
                   "members": [
                     {
-                      "type": "REPEAT",
-                      "content": {
-                        "type": "STRING",
-                        "value": "\n"
-                      }
+                      "type": "CHOICE",
+                      "members": [
+                        {
+                          "type": "SYMBOL",
+                          "name": "_comma_sentinel"
+                        },
+                        {
+                          "type": "BLANK"
+                        }
+                      ]
                     },
                     {
                       "type": "SEQ",
@@ -2816,22 +3026,25 @@
                         "type": "SEQ",
                         "members": [
                           {
-                            "type": "REPEAT",
+                            "type": "ALIAS",
                             "content": {
-                              "type": "STRING",
-                              "value": "\n"
-                            }
-                          },
-                          {
-                            "type": "STRING",
+                              "type": "SYMBOL",
+                              "name": "comma"
+                            },
+                            "named": false,
                             "value": ","
                           },
                           {
-                            "type": "REPEAT",
-                            "content": {
-                              "type": "STRING",
-                              "value": "\n"
-                            }
+                            "type": "CHOICE",
+                            "members": [
+                              {
+                                "type": "SYMBOL",
+                                "name": "_comma_sentinel"
+                              },
+                              {
+                                "type": "BLANK"
+                              }
+                            ]
                           },
                           {
                             "type": "SEQ",
@@ -2890,13 +3103,6 @@
                           }
                         ]
                       }
-                    },
-                    {
-                      "type": "REPEAT",
-                      "content": {
-                        "type": "STRING",
-                        "value": "\n"
-                      }
                     }
                   ]
                 },
@@ -2909,20 +3115,13 @@
               "type": "CHOICE",
               "members": [
                 {
-                  "type": "SEQ",
-                  "members": [
-                    {
-                      "type": "STRING",
-                      "value": ","
-                    },
-                    {
-                      "type": "REPEAT",
-                      "content": {
-                        "type": "STRING",
-                        "value": "\n"
-                      }
-                    }
-                  ]
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "comma"
+                  },
+                  "named": false,
+                  "value": ","
                 },
                 {
                   "type": "BLANK"
@@ -2932,7 +3131,12 @@
           ]
         },
         {
-          "type": "STRING",
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "close_brace"
+          },
+          "named": false,
           "value": "}"
         }
       ]
@@ -2954,11 +3158,16 @@
                   "type": "SEQ",
                   "members": [
                     {
-                      "type": "REPEAT",
-                      "content": {
-                        "type": "STRING",
-                        "value": "\n"
-                      }
+                      "type": "CHOICE",
+                      "members": [
+                        {
+                          "type": "SYMBOL",
+                          "name": "_comma_sentinel"
+                        },
+                        {
+                          "type": "BLANK"
+                        }
+                      ]
                     },
                     {
                       "type": "SYMBOL",
@@ -2970,35 +3179,31 @@
                         "type": "SEQ",
                         "members": [
                           {
-                            "type": "REPEAT",
+                            "type": "ALIAS",
                             "content": {
-                              "type": "STRING",
-                              "value": "\n"
-                            }
-                          },
-                          {
-                            "type": "STRING",
+                              "type": "SYMBOL",
+                              "name": "comma"
+                            },
+                            "named": false,
                             "value": ","
                           },
                           {
-                            "type": "REPEAT",
-                            "content": {
-                              "type": "STRING",
-                              "value": "\n"
-                            }
+                            "type": "CHOICE",
+                            "members": [
+                              {
+                                "type": "SYMBOL",
+                                "name": "_comma_sentinel"
+                              },
+                              {
+                                "type": "BLANK"
+                              }
+                            ]
                           },
                           {
                             "type": "SYMBOL",
                             "name": "_expression"
                           }
                         ]
-                      }
-                    },
-                    {
-                      "type": "REPEAT",
-                      "content": {
-                        "type": "STRING",
-                        "value": "\n"
                       }
                     }
                   ]
@@ -3012,20 +3217,13 @@
               "type": "CHOICE",
               "members": [
                 {
-                  "type": "SEQ",
-                  "members": [
-                    {
-                      "type": "STRING",
-                      "value": ","
-                    },
-                    {
-                      "type": "REPEAT",
-                      "content": {
-                        "type": "STRING",
-                        "value": "\n"
-                      }
-                    }
-                  ]
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "comma"
+                  },
+                  "named": false,
+                  "value": ","
                 },
                 {
                   "type": "BLANK"
@@ -3035,7 +3233,12 @@
           ]
         },
         {
-          "type": "STRING",
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "close_bracket"
+          },
+          "named": false,
           "value": "]"
         }
       ]
@@ -3050,21 +3253,17 @@
         {
           "type": "REPEAT",
           "content": {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "STRING",
-                "value": "\n"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "word"
-              }
-            ]
+            "type": "SYMBOL",
+            "name": "word"
           }
         },
         {
-          "type": "STRING",
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "closing_list"
+          },
+          "named": false,
           "value": "|"
         }
       ]
@@ -3077,14 +3276,12 @@
           "name": "function_parameter"
         },
         {
-          "type": "REPEAT",
+          "type": "ALIAS",
           "content": {
-            "type": "STRING",
-            "value": "\n"
-          }
-        },
-        {
-          "type": "STRING",
+            "type": "SYMBOL",
+            "name": "named_parameter_equals"
+          },
+          "named": false,
           "value": "="
         },
         {
@@ -3320,11 +3517,16 @@
                   "type": "SEQ",
                   "members": [
                     {
-                      "type": "REPEAT",
-                      "content": {
-                        "type": "STRING",
-                        "value": "\n"
-                      }
+                      "type": "CHOICE",
+                      "members": [
+                        {
+                          "type": "SYMBOL",
+                          "name": "_comma_sentinel"
+                        },
+                        {
+                          "type": "BLANK"
+                        }
+                      ]
                     },
                     {
                       "type": "SYMBOL",
@@ -3336,35 +3538,31 @@
                         "type": "SEQ",
                         "members": [
                           {
-                            "type": "REPEAT",
+                            "type": "ALIAS",
                             "content": {
-                              "type": "STRING",
-                              "value": "\n"
-                            }
-                          },
-                          {
-                            "type": "STRING",
+                              "type": "SYMBOL",
+                              "name": "comma"
+                            },
+                            "named": false,
                             "value": ","
                           },
                           {
-                            "type": "REPEAT",
-                            "content": {
-                              "type": "STRING",
-                              "value": "\n"
-                            }
+                            "type": "CHOICE",
+                            "members": [
+                              {
+                                "type": "SYMBOL",
+                                "name": "_comma_sentinel"
+                              },
+                              {
+                                "type": "BLANK"
+                              }
+                            ]
                           },
                           {
                             "type": "SYMBOL",
                             "name": "_expression"
                           }
                         ]
-                      }
-                    },
-                    {
-                      "type": "REPEAT",
-                      "content": {
-                        "type": "STRING",
-                        "value": "\n"
                       }
                     }
                   ]
@@ -3378,20 +3576,13 @@
               "type": "CHOICE",
               "members": [
                 {
-                  "type": "SEQ",
-                  "members": [
-                    {
-                      "type": "STRING",
-                      "value": ","
-                    },
-                    {
-                      "type": "REPEAT",
-                      "content": {
-                        "type": "STRING",
-                        "value": "\n"
-                      }
-                    }
-                  ]
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "comma"
+                  },
+                  "named": false,
+                  "value": ","
                 },
                 {
                   "type": "BLANK"
@@ -3401,7 +3592,12 @@
           ]
         },
         {
-          "type": "STRING",
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "close_paren"
+          },
+          "named": false,
           "value": ")"
         }
       ]
@@ -4680,11 +4876,15 @@
             "members": [
               {
                 "type": "SYMBOL",
-                "name": "word"
+                "name": "_literal"
               },
               {
-                "type": "SYMBOL",
-                "name": "_literal"
+                "type": "PREC",
+                "value": -20,
+                "content": {
+                  "type": "PATTERN",
+                  "value": "[^\"'/]+"
+                }
               }
             ]
           }
@@ -4757,7 +4957,7 @@
       "members": [
         {
           "type": "PATTERN",
-          "value": "\\\\[\"'\\\\bfnrt]"
+          "value": "\\\\[\"'\\\\/bfnrt]"
         },
         {
           "type": "PATTERN",
@@ -4866,6 +5066,10 @@
         {
           "type": "STRING",
           "value": "\n"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_terminator_sentinel"
         }
       ]
     },
@@ -4906,6 +5110,10 @@
     },
     {
       "type": "SYMBOL",
+      "name": "_newline"
+    },
+    {
+      "type": "SYMBOL",
       "name": "escaped_newline"
     }
   ],
@@ -4914,10 +5122,7 @@
       "parameter_list_call"
     ],
     [
-      "proc_block"
-    ],
-    [
-      "proc_block",
+      "_statements",
       "_statement_terminator"
     ]
   ],
@@ -4945,6 +5150,54 @@
     },
     {
       "type": "SYMBOL",
+      "name": "comma"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "semicolon"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "close_paren"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "close_brace"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "close_bracket"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "closing_list"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "named_parameter_equals"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_newline"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_terminator_sentinel"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_statement_sentinel"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_multiline_command_sentinel"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_comma_sentinel"
+    },
+    {
+      "type": "SYMBOL",
       "name": "error_sentinel"
     }
   ],
@@ -4952,9 +5205,7 @@
     "_statement",
     "_terminator"
   ],
-  "supertypes": [
-    "_statement"
-  ],
+  "supertypes": [],
   "reserved": {
     "global": [
       {

@@ -1,8 +1,0 @@
-# comment
-func foo (lol, ll; named=false, s=0, l='\"lol') {
-  var myvar = 'test'
-  for i in (0 ..< n) {
-    setvar myvar = 'newval'
-  }
-  echo $myvar "it works!"
-}

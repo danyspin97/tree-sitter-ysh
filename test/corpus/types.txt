@@ -281,21 +281,13 @@ if (z !~ / '.255' %end /) {
 (program
   (variable_declaration
     (variable_name)
-    (eggex
-      (word)
-      (ERROR
-        (variable_name)
-        (variable_name))))
+    (eggex))
   (variable_declaration
     (variable_name)
     (eggex
-      (word)
       (string)
-      (word)
       (string)
-      (word)
       (string)
-      (word)
       (string)))
   (variable_declaration
     (variable_name)
@@ -317,8 +309,7 @@ if (z !~ / '.255' %end /) {
     (binary_expression
       (variable_name)
       (eggex
-        (string)
-        (word)))
+        (string)))
     (block
       (command_call
         (command_name
