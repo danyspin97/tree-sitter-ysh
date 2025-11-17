@@ -456,3 +456,22 @@ true
   (command_call
     (command_name
       (word))))
+==============
+Lazy arguments
+==============
+assert [fromJson(a) === fromJson(b)]
+---
+(program
+  (command_call
+    (command_name
+      (word))
+    (parameter_list_call
+      (binary_expression
+        (function_call
+          (function_name
+            (variable_name))
+          (variable_name))
+        (function_call
+          (function_name
+            (variable_name))
+          (variable_name))))))

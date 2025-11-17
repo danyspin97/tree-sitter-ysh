@@ -14,6 +14,7 @@ enum TokenType {
   CLOSE_BRACKET,
   CLOSING_LIST,
   NAMED_PARAM_EQ,
+  BYTE_STRING_MARKER,
   NEWLINE,
   TERMINATOR_SENTINEL,
   STATEMENT_SENTINEL,
@@ -57,18 +58,19 @@ bool tree_sitter_ysh_external_scanner_scan(void *payload, TSLexer *lexer,
   while ((valid_symbols[CLOSE_PAREN] || valid_symbols[CLOSE_BRACE] ||
           valid_symbols[CLOSE_BRACKET] || valid_symbols[COMMA] ||
           valid_symbols[SEMICOLON] || valid_symbols[CLOSING_LIST] ||
-          valid_symbols[NAMED_PARAM_EQ] || valid_symbols[STATEMENT_SENTINEL]
-          || valid_symbols[MULTILINE_CMD_SENTINEL] || valid_symbols[COMMA_SENTINEL]) &&
+          valid_symbols[NAMED_PARAM_EQ] || valid_symbols[STATEMENT_SENTINEL] ||
+          valid_symbols[MULTILINE_CMD_SENTINEL] ||
+          valid_symbols[COMMA_SENTINEL]) &&
          !valid_symbols[TERMINATOR_SENTINEL] && lexer->lookahead == '\n') {
     lexer->advance(lexer, false);
     if (valid_symbols[MULTILINE_CMD_SENTINEL]) {
-        while (lexer->lookahead == ' ') {
-            lexer->advance(lexer, true);
-        }
-        // Two consecutive newlines are not allowed in multiline commands
-        if (lexer->lookahead == '\n') {
-            return false;
-        }
+      while (lexer->lookahead == ' ') {
+        lexer->advance(lexer, true);
+      }
+      // Two consecutive newlines are not allowed in multiline commands
+      if (lexer->lookahead == '\n') {
+        return false;
+      }
     }
     lexer->result_symbol = NEWLINE;
     return true;
@@ -148,6 +150,15 @@ bool tree_sitter_ysh_external_scanner_scan(void *payload, TSLexer *lexer,
     if (is_alnum_(lexer->lookahead) || lexer->lookahead == '[' ||
         lexer->lookahead == '(') {
       lexer->result_symbol = HAT_EXPANSION;
+      return true;
+    }
+    return false;
+  }
+
+  if (valid_symbols[BYTE_STRING_MARKER] && lexer->lookahead == 'b') {
+    lexer->advance(lexer, false);
+    if (lexer->lookahead == '\'') {
+      lexer->result_symbol = BYTE_STRING_MARKER;
       return true;
     }
     return false;
