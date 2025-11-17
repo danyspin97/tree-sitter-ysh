@@ -648,8 +648,10 @@ module.exports = grammar({
           "'''",
         ),
       ),
-    _single_quotes_string: (_) => choice(/'[^'\\]*'/, /'''[^\\]*'''/),
-    _raw_string: (_) => choice(/r'[^']*'/, /r'''[^']*'''/),
+    _single_quotes_string: (_) =>
+      choice(/'[^\\']*'/, seq("'''", repeat(choice(/[^\\']+/, "'")), "'''")),
+    _raw_string: (_) =>
+      choice(/r'[^']*'/, seq("r'''", repeat(choice(/[^']+/, "'")), "'''")),
     escaped_double_quote: (_) => '\\"',
     escaped_single_quote: (_) => "\\'",
     escaped_newline: (_) => "\\\n",

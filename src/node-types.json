@@ -5021,6 +5021,10 @@
     "named": true
   },
   {
+    "type": "r'''",
+    "named": false
+  },
+  {
     "type": "range_operator",
     "named": true
   },
