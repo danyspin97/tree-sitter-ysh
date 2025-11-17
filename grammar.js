@@ -563,21 +563,24 @@ module.exports = grammar({
     redirection: ($) =>
       prec(
         20,
-        seq(
-          optional(alias($._decimal, $.number)),
-          choice(
-            "<",
-            "<>",
-            ">&",
-            "&>",
-            ">",
-            ">|",
-            ">>",
-            "&>>",
-            ">>&",
-            "<<<",
+        choice(
+          seq(
+            optional(alias($._decimal, $.number)),
+            choice(
+              "<",
+              "<>",
+              ">&",
+              "&>",
+              ">",
+              ">|",
+              ">>",
+              "&>>",
+              ">>&",
+              "<<<",
+            ),
+            field("redirection_value", choice($.word, $._literal)),
           ),
-          field("redirection_value", choice($.word, $._literal)),
+          seq("<(", $.command_call, ")"),
         ),
       ),
     _double_quotes_string: ($) =>

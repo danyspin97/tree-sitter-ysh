@@ -475,3 +475,24 @@ assert [fromJson(a) === fromJson(b)]
           (function_name
             (variable_name))
           (variable_name))))))
+============
+<() operator
+============
+diff <(write $one) <(write $two)
+---
+(program
+  (command_call
+    (command_name
+      (word))
+    (redirection
+      (command_call
+        (command_name
+          (word))
+        (expansion
+          (variable_name))))
+    (redirection
+      (command_call
+        (command_name
+          (word))
+        (expansion
+          (variable_name))))))

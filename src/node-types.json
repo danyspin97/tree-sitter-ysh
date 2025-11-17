@@ -3790,7 +3790,7 @@
     "fields": {
       "redirection_value": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "boolean",
@@ -3819,6 +3819,10 @@
       "multiple": false,
       "required": false,
       "types": [
+        {
+          "type": "command_call",
+          "named": true
+        },
         {
           "type": "number",
           "named": true
@@ -4836,6 +4840,10 @@
   },
   {
     "type": "<",
+    "named": false
+  },
+  {
+    "type": "<(",
     "named": false
   },
   {
