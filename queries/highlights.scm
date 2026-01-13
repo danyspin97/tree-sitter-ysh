@@ -1,4 +1,4 @@
-((string) @string (#set! priority 10))
+((string) @string)
 
 [
   "var"
@@ -33,7 +33,7 @@
 ((command_name) @keyword.import
   (#eq? @keyword.import "use"))
 ((command_name) "=" @keyword.debug)
-((command_name) @function.call (#set! priority 90))
+((command_name) @function.call)
 
 [
   "func"
@@ -103,23 +103,20 @@
 
 variable: (variable_name) @variable
 constant: (variable_name) @constant
-((variable_name) @variable
-             (#set! priority 20))
+((variable_name) @variable)
 (variable_assignment key: (variable_name) @property)
 
 ; (dollar_token) @punctuation.special
 
 member: (variable_name) @variable.member
 key: (variable_name) @variable.member
-             (#set! priority 20)
 
 ((variable_name) @variable.builtin
                  (#eq? @variable.builtin "_error"))
 
 (function_definition (function_name) @function)
 (proc_definition (proc_name) @function)
-(function_call (function_name) @function.call
-             (#set! priority 90))
+(function_call (function_name) @function.call)
 (method_call method: (function_name) @function.method.call)
 parameter: (variable_name) @variable.parameter
 (rest_of_arguments) @variable.parameter
